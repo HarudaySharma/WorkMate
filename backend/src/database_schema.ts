@@ -1,13 +1,14 @@
-type User = {
+export type User = {
     id: string, // (Primary Key)
 	name: string,
-	password: string // (hashedPass)
-	userName: string // (unique)
+	username: string // (unique)
     email: string, // (unique)
-    isEmailVerified: boolean,// make email verified.
-	profilePicture: string
-    createdAt: Date,
-    updatedAt: Date,
+	hashed_password: string // (hashedPass)
+    hash_salt: string,
+    email_verified: boolean,// make email verified.
+	profile_picture: string
+    created_at: Date,
+    updated_at: Date,
     // optional:
     // status: "online" | "offline"
 }
