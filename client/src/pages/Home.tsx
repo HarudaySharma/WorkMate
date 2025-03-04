@@ -1,39 +1,68 @@
 import React from 'react'
 import NavBar from '../components/NavBar'
-import { PiHandWavingLight } from "react-icons/pi";
+import Hero from '../components/Hero';
+import { FolderOutput, ListTodo, MessagesSquare } from 'lucide-react';
 
 const Home = () => {
   return (
     <div className='font-nunito min-h-screen bg-white'>
-      <NavBar />
-      <div className='flex relative overflow-hidden'>
-        {/*left side with content and color blue and half diagonal cut */}
-        <div className='w-full lg:3/5 bg-customBlue text-white p-32 relative pl-24'>
-          <div className='max-w-lg relative z-10'>
-            <h2 className='text-3xl font-medium -mt-18 mb-20'>
-              Welcome to WorkMate<PiHandWavingLight />
-            </h2>
 
-            <h1 className='text-5xl font-extrabold mt-10 mb-20'>
-              Work the way that works for you
-            </h1>
+      <NavBar /> 
 
-            <p className='text-2xl mb-20 '>
-              Create, Build, Collaborate, Manage and make work efficient
-            </p>
+      <Hero/>
 
-            <button className='bg-customYellow hover:bg-yellow-500 text-customBlack font-bold py-3 px-8 rounded-lg transition-colors'>
-              Get Started
-            </button>
+      {/* This is the Features Section "What you can do?" */}
+
+      <div className='py-16 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-2 font-nunito'>
+        <h2 className='text-center text-3xl md:text-5xl font-semibold mb-24 text-customBlack'>
+          What you <span className='text-customYellow'>can do?</span>
+        </h2>
+
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-36 max-w-6xl mx-auto'>
+          {/*Feature 1 - Real Time Chatting*/}
+
+          <div className='flex flex-col items-center text-center'>
+
+            <div className='bg-amber-300 h-20 w-20 rounded-3xl flex items-center justify-center mb-8'>
+            <MessagesSquare size={52} className='text-white'/>
+            </div>
+
+            <h3 className='text-xl font-bold text-customBlack mb-6'>Real Time Chatting</h3>
+            <p className='text-gray-600'>Communicate instantly with your team using our built-in chat feature, ensuring smooth collaboration.</p>
           </div>
 
-          {/*Diagonal cut effect - reversed direction*/}
-          <div className='absolute top-0 right-0 h-full w-24 lg:w-48 bg-white transform translate-x-1/2 skew-x-[-15deg]'></div>
-        </div>
-        {/*right side empty for now*/}
-        <div className='lg:block lg:w-2/5 bg-white'></div>
+          {/*Feature 2 - File Sharing*/}
 
-      </div>  
+          <div className='flex flex-col items-center text-center'>
+
+            <div className='bg-customBlue h-20 w-20 rounded-3xl flex items-center justify-center mb-8'>
+            <FolderOutput size={52} className='text-white' />
+            </div>
+
+            <h3 className='text-xl font-bold text-customBlack mb-6'>File Sharing</h3>
+            <p className='text-gray-600'>Easily upload and share files with your team members for seamless document collaboration.</p>
+          </div>
+
+          {/*Feature 3 - Task Management*/}
+
+          <div className='flex flex-col items-center text-center'>
+
+            <div className='bg-amber-300 h-20 w-20 rounded-3xl flex items-center justify-center mb-8'>
+            <ListTodo size={52} className='text-white'/>
+            </div>
+
+            <h3 className='text-xl font-bold text-customBlack mb-6'>Task Management</h3>
+
+            <p className='text-gray-600'>Assign tasks, set deadlines, and monitor project progress to ensure everything stays on track.</p>
+          </div>
+
+        </div>
+      </div>
+
+
+
+      
+
     </div>
   )
 }
