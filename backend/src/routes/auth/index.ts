@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { login, OAuth, signup } from "../../controllers/auth";
-import loginVia from "../../middlewares/loginVia.middleware.js";
 
 const router = Router();
 
-router.post("/login", loginVia, login)
+router.post("/login", login)
 router.post("/signup", signup)
 router.post("/oauth/:provider", OAuth)
 

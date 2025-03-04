@@ -7,10 +7,9 @@ import logger from "./logger.js";
 
 import authRoutes from "./routes/auth"
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
-import { connectToDb } from "./services/mqsql/mysql.service.js";
+import db from "./services/mqsql/mysql.service.js";
 
 // connection to db
-connectToDb()
 
 // initializing the router
 const app = express();
