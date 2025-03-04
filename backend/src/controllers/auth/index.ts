@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import logger from "../../logger.js";
-import { findUser } from "../../services/mqsql/queries/index.js";
 import { Errorr } from "../../middlewares/error.middleware.js";
+import db from "../../services/mqsql/mysql.service.js";
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("loggin in")
@@ -18,7 +18,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     try {
         // TODO: you are here
-        const user = await findUser({ username, email })
+        const user = await db.findUser({ username, email })
         console.log({ user })
 
         if (viaEmail) {
