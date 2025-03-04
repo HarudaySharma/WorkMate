@@ -7,6 +7,7 @@ import logger from "./logger.js";
 
 import authRoutes from "./routes/auth"
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
+import db from "./services/mqsql/mysql.service.js";
 
 // connection to db
 

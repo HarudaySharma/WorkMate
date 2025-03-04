@@ -1,8 +1,9 @@
-import mysql, { Connection } from "mysql2/promise"
+import mysql, { Connection, ResultSetHeader } from "mysql2/promise"
 import logger from "../../logger.js"
 import { createUserTable as createUserTableQ } from "./queries/createTableQueries.js";
 import { deleteUserTable } from "./queries/deleteTableQueries.js";
 import { User } from "../../database_schema.js";
+import { Errorr } from "../../middlewares/error.middleware.js";
 
 type Table = "user" | "workspace" | "chat" | "message"
 
@@ -115,24 +116,64 @@ class Database {
             throw new Error("failed to connect to database")
         }
 
-        const query = `
-            SELECT *
-            FROM users
-            WHERE username=${user.username} OR email=${user.email};
-        `
+        const query = `SELECT * FROM users WHERE username = ? or email = ?;`
 
         try {
-            const [result, fields] = await this.#database.execute(query)
+            const [rows] = await this.#database.execute(query, [
+                user.username || "",
+                user.email || "",
+            ])
 
-            logger.info({ result, fields });
+            if (!Array.isArray(rows)) {
+                return null;
+            }
 
-            return fields[0];
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows[0] as User;
+
         } catch (err) {
             logger.error(err)
             throw new Error("failed to execute query on db")
         }
     }
 
+    async addUser(user: Partial<User>) {
+        await this.connect() // makes sure that the database is connected
+
+        if (this.#database === null) { // still not connected to db (check the server logs)
+            throw new Error("failed to connect to database")
+        }
+
+        logger.info("adding user to the db...")
+
+        const query = `INSERT INTO users (name, username, email, hashed_password, hash_salt, profile_picture) VALUES (?, ?, ?, ?, ?, ?);`
+        try {
+            const [rows] = await this.#database.execute(query, [
+                user.name || user.username || "",
+                user.username || "",
+                user.email,
+                user.hashed_password,
+                user.hash_salt,
+                user.profile_picture,
+            ])
+            const header = rows as ResultSetHeader
+
+            if (header.affectedRows !== 1) {
+                throw new Error("failed to insert user into db")
+            }
+
+            logger.info("operation successfull (added user to db)")
+
+            return;
+
+        } catch (err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
 }
 
 const db = new Database();
