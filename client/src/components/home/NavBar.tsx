@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import logoWM from '../assets/logoWMnew-Photoroom.jpg'
+import logoWM from '../../assets/logoWMnew-Photoroom.jpg'
 import {Menu, X} from 'lucide-react';
 
 const NavBar = () => {
