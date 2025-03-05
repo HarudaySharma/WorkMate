@@ -3,12 +3,15 @@ import logger from "../../logger.js"
 import { createUserTable as createUserTableQ } from "./queries/createTableQueries.js";
 import { deleteUserTable } from "./queries/deleteTableQueries.js";
 import { User } from "../../database_schema.js";
-import { Errorr } from "../../middlewares/error.middleware.js";
 
 type Table = "user" | "workspace" | "chat" | "message"
 
 class Database {
     #database: Connection | null = null
+
+    //TODO: for connection retries to db
+    // #MAX_RETRIES = 10
+    // #retryCount = 0
 
     constructor() {
         this.connect();
@@ -35,8 +38,11 @@ class Database {
             return this.#database
         }
         catch (err) {
-            logger.error("error connection to mysql database")
-            throw err;
+            logger.error("error connecting to mysql database")
+            console.log(err)
+
+            logger.info("database not connecting, Stopping the server")
+            process.exit(1)
         }
     }
 
@@ -109,7 +115,7 @@ class Database {
         }
     }
 
-    async findUser(user: Pick<User, "username" | "email">) {
+    async findUser(user: Partial<Pick<User, "username" | "email">>) {
         await this.connect() // makes sure that the database is connected
 
         if (this.#database === null) { // still not connected to db (check the server logs)
@@ -127,7 +133,6 @@ class Database {
             if (!Array.isArray(rows)) {
                 return null;
             }
-
             if (rows.length == 0) {
                 return null;
             }
@@ -159,8 +164,8 @@ class Database {
                 user.hash_salt,
                 user.profile_picture,
             ])
-            const header = rows as ResultSetHeader
 
+            const header = rows as ResultSetHeader
             if (header.affectedRows !== 1) {
                 throw new Error("failed to insert user into db")
             }
@@ -171,89 +176,41 @@ class Database {
 
         } catch (err) {
             logger.error(err)
-            throw new Error("failed to execute query on db")
+            throw new Error("failed to INSERT execute query on db")
+        }
+    }
+
+    async deleteUser(user: Partial<Pick<User, "username" | "email">>) {
+        await db.connect();
+
+        if (this.#database === null) { // still not connected to db (check the server logs)
+            throw new Error("failed to connect to database")
+        }
+
+        logger.info("deleting user...")
+
+        const query = `DELETE FROM users where username = ? or email = ?`
+        try {
+            const [rows] = await this.#database.execute(query, [
+                user.username,
+                user.email,
+            ])
+
+            const header = rows as ResultSetHeader
+            if (header.affectedRows !== 1) {
+                throw new Error(`failed to delete user ${user} from db`)
+            }
+
+            logger.info(`operation successfull (deleted user ${user} from db)`)
+
+            return
+        } catch (err) {
+            logger.error(err)
+            throw new Error("failed to execute DELETE query on db")
         }
     }
 }
 
 const db = new Database();
 export default db;
-
-
-// export const connectToDb = async () => {
-//     try {
-//         database = await mysql.createConnection({
-//             host: 'localhost',
-//             user: 'harud',
-//             password: '123',
-//             database: 'db',
-//         })
-//         logger.info(`connected to mysql db with id: ${database.threadId}`)
-//
-//     } catch (err) {
-//         logger.error("error connection to mysql database")
-//         logger.error(err)
-//     }
-// }
-
-// export const createUserTable = async () => {
-//     logger.info("creating user table...")
-//
-//     const userTableQuery = `
-//     CREATE TABLE IF NOT EXISTS users (
-//         id INT AUTO_INCREMENT PRIMARY KEY,
-//
-//         name VARCHAR(100),
-//         username VARCHAR(100) UNIQUE NOT NULL,
-//
-//         email VARCHAR(100) UNIQUE NOT NULL,
-//         email_verified TINYINT(1) DEFAULT 0, -- Boolean field with default value (0 = false)
-//
-//         hashed_password TEXT NOT NULL,
-//         hash_salt CHAR(10) NOT NULL,
-//
-//         profile_picture VARCHAR(2083) DEFAULT "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y", -- maximum url length is 2083 in most of the browsers
-//
-//         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-//         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-//     );
-// `
-//
-//     if (database === null) {
-//         logger.error("database is not defined, check database connection")
-//         return
-//     }
-//
-//     try {
-//         const [result, fields] = await database.execute(userTableQuery)
-//         logger.info({ result, fields })
-//     } catch (err) {
-//         logger.error("error creating user table")
-//         logger.error(err)
-//         return
-//     }
-// }
-
-// export const deleteUserTable = async () => {
-//     logger.info("deleting user table...")
-//
-//     const deleteQuery = `
-//         DROP TABLE users;
-//     `
-//
-//     if (database === null) {
-//         logger.error("database is not defined, check database connection")
-//         return
-//     }
-//
-//     try {
-//         const [result, fields] = await database.execute(deleteQuery)
-//         logger.info({ result, fields })
-//     } catch (err) {
-//         logger.error("error deleting the user table");
-//         logger.error(err)
-//         return
-//     }
-// }
-//
 

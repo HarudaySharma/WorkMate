@@ -10,6 +10,8 @@ export const generateToken = (user: Pick<User, "name" | "profile_picture" | "use
         }
     }
 
+    console.log({ token_payload: payload })
+
     return jwt.sign(payload, env.JWT_SECRET, { algorithm: "HS256" });
 }
 

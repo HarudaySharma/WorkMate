@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 
 
 import env from "./zod.js";
@@ -7,14 +8,12 @@ import logger from "./logger.js";
 
 import authRoutes from "./routes/auth"
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
-import db from "./services/mqsql/mysql.service.js";
-
-// connection to db
 
 // initializing the router
 const app = express();
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.use('/auth', authRoutes);
 
