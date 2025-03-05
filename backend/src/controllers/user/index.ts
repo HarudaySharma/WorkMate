@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import db from "../../services/mqsql/mysql.service.js";
 
 import { Errorr } from "../../middlewares/error.middleware.js";
+import UserRepository from "../../services/mqsql/UserRepository.service.js";
 
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -14,7 +15,9 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     }
 
     try {
-        await db.deleteUser({
+        const userRepo = new UserRepository(await db.getConnection())
+
+        await userRepo.deleteUser({
             username: user.username,
             email: user.email,
         })

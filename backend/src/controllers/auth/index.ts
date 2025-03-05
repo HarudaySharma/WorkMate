@@ -12,6 +12,8 @@ import generateHashedPass from "../../utils/generateHashedPass.js";
 import comparePassword from "../../utils/comparePassword.js";
 import { generateToken } from "../../utils/jwt.js";
 import generatePassword from "../../utils/generatePassword.js";
+import UserRepository from "../../services/mqsql/UserRepository.service.js";
+
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: /auth/login")
@@ -19,7 +21,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const { username, email, password } = req.body
 
     try {
-        const user = await db.findUser({ username, email })
+        const userRepo = new UserRepository(await db.getConnection())
+
+        const user = await userRepo.findUser({ username, email })
 
         console.log({ user })
         if (user === null) {
@@ -62,7 +66,9 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     }
     // check for the user in db
     try {
-        const user = await db.findUser({ username, email });
+        const userRepo = new UserRepository(await db.getConnection())
+
+        const user = await userRepo.findUser({ username, email });
         if (user !== null) {
             next(new Errorr("account already exists with username or email", StatusCodes.CONFLICT)) // conflict
             return
@@ -79,9 +85,9 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
             profile_picture: `https://ui-avatars.com/api/?name=${username}` // default profile pics
         }
 
-        await db.addUser(newUser);
+        await userRepo.addUser(newUser);
 
-        const addedUser = await db.findUser({ username })
+        const addedUser = await userRepo.findUser({ username })
         if (addedUser === null) {
             next(new Errorr("failed to find added user in db", StatusCodes.NOT_FOUND))
             return
@@ -118,7 +124,9 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
     }
     // check for the user in db
     try {
-        const user = await db.findUser({ username, email });
+        const userRepo = new UserRepository(await db.getConnection())
+
+        const user = await userRepo.findUser({ username, email });
         if (user !== null) {
             // redirect the user to login user must have already signup using the service provider.
             const token = generateToken({
@@ -147,8 +155,8 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
             profile_picture: profile_picture || `https://ui-avatars.com/api/?name=${username}` // default profile pics
         }
 
-        await db.addUser(newUser);
-        const addedUser = await db.findUser({ username })
+        await userRepo.addUser(newUser);
+        const addedUser = await userRepo.findUser({ username })
         if (addedUser === null) {
             next(new Errorr("failed to find added user in db", StatusCodes.NOT_FOUND))
             return

@@ -1,13 +1,11 @@
 import { Router } from "express";
-import { deleteUser, login, oAuth, signup } from "../../controllers/auth";
-import verifyToken from "../../middlewares/verifyToken.middleware.js";
+import { login, oAuth, signup } from "../../controllers/auth";
 
 const router = Router();
 
 router.post("/login", login)
 router.post("/signup", signup)
 router.post("/oauth/:provider", oAuth)
-router.delete("/delete", verifyToken, deleteUser)
 
 export default router;
 
