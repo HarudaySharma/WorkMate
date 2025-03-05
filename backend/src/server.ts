@@ -7,6 +7,8 @@ import logger from "./logger.js";
 
 
 import authRoutes from "./routes/auth"
+import userRoutes from "./routes/user"
+
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
 
 // initializing the router
@@ -15,7 +17,9 @@ const app = express();
 app.use(express.json())
 app.use(cookieParser())
 
-app.use('/auth', authRoutes);
+// routes
+app.use('api/auth', authRoutes);
+app.use('api/user', userRoutes);
 
 app.use("*", (_, __, next) => {
     next(new Errorr("Not found", 404))

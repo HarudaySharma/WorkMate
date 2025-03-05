@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Errorr } from "./error.middleware.js";
 
-const loginVia = (req: Request, res: Response, next: NextFunction) => {
+const loginVia = (req: Request, _: Response, next: NextFunction) => {
     const {username, email} = req.body
 
     if(username != undefined) {

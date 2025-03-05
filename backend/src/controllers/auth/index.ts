@@ -107,7 +107,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 }
 
 
-export const OAuth = async (req: Request, res: Response, next: NextFunction) => {
+export const oAuth = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: /auth/OAuth")
 
     const { username, name, email, profile_picture } = req.body;
@@ -170,25 +170,4 @@ export const OAuth = async (req: Request, res: Response, next: NextFunction) => 
         next(new Errorr("", StatusCodes.INTERNAL_SERVER_ERROR))
     }
     next()
-}
-
-
-export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-    if (user === undefined) {
-        next(new Errorr("not authorized to delete this user", StatusCodes.UNAUTHORIZED))
-        return
-    }
-
-    try {
-        await db.deleteUser({
-            username: user.username,
-            email: user.email,
-        })
-
-        res.clearCookie("access_token")
-        res.status(StatusCodes.OK).json({ success: true })
-    } catch (err) {
-        next(new Errorr("failed to delete user", StatusCodes.INTERNAL_SERVER_ERROR))
-    }
 }

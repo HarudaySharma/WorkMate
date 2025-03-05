@@ -1,9 +1,11 @@
-import jwt from "jsonwebtoken"
 import { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import jwt from "jsonwebtoken"
+
 import env from "../zod.js";
 import { Errorr } from "./error.middleware.js";
-import { StatusCodes } from "http-status-codes";
 import { JWTPayload } from "../types/index.js";
+
 
 const verifyToken = (req: Request, _: Response, next: NextFunction) => {
     if (!req.cookies) {
@@ -27,4 +29,5 @@ const verifyToken = (req: Request, _: Response, next: NextFunction) => {
     }
 
 }
+
 export default verifyToken
