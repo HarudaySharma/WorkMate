@@ -9,13 +9,13 @@ import { JWTPayload } from "../types/index.js";
 
 const verifyToken = (req: Request, _: Response, next: NextFunction) => {
     if (!req.cookies) {
-        next(new Errorr("missing cookies", StatusCodes.FORBIDDEN))
+        next(new Errorr("missing cookies", StatusCodes.UNAUTHORIZED))
         return
     }
 
     const { access_token } = req.cookies;
     if (!access_token) {
-        next(new Errorr("missing access_token", StatusCodes.FORBIDDEN))
+        next(new Errorr("missing access_token", StatusCodes.UNAUTHORIZED))
         return
     }
 

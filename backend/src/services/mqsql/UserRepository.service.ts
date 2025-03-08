@@ -89,10 +89,10 @@ class UserRepository {
 
             const header = rows as ResultSetHeader
             if (header.affectedRows !== 1) {
-                throw new Error(`failed to delete user ${user} from db`)
+                throw new Error(`failed to delete user {username: ${user.username}, email: ${user.email}} from db`)
             }
 
-            logger.info(`Deleted user: ${user.username || user.email}`);
+            logger.info(`Deleted user {username: ${user.username}, email: ${user.email}} from db`);
 
             return
         } catch (err) {

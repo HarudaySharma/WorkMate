@@ -1,4 +1,4 @@
-export const createUserTable = () => {
+export const createUsersTable = () => {
     return `
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,3 +20,38 @@ export const createUserTable = () => {
     `
 }
 
+
+export const createWorkspacesTable = () => {
+    return `
+     CREATE TABLE IF NOT EXISTS workspaces (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            invite_link VARCHAR(255) UNIQUE,
+            creator_id INT NOT NULL,
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            CONSTRAINT fk_creator_id FOREIGN KEY (creator_id)
+                REFERENCES users(id)
+                -- ON DELETE CASCADE -- will use it later
+        );
+    `;
+}
+
+export const createMembersTable = () => {
+    return `
+        CREATE TABLE IF NOT EXISTS members (
+            user_id INT,
+            workspace_id INT,
+            role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+
+            CONSTRAINT fk_user_id FOREIGN KEY (user_id)
+                REFERENCES users(id),
+                -- ON DELETE CASCADE -- will use it later
+
+            CONSTRAINT fk_workspace_id FOREIGN KEY (workspace_id)
+                REFERENCES workspaces(id)
+                -- ON DELETE CASCADE -- will use it later
+        );
+    `
+}

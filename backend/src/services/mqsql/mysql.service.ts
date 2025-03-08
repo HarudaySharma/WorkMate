@@ -1,9 +1,9 @@
 import mysql, { Connection } from "mysql2/promise"
 import logger from "../../logger.js"
-import { createUserTable as createUserTableQ } from "./queries/createTableQueries.js";
+import { createMembersTable, createUsersTable as createUserTableQ, createWorkspacesTable } from "./queries/createTableQueries.js";
 import { deleteUserTable } from "./queries/deleteTableQueries.js";
 
-type Table = "user" | "workspace" | "chat" | "message"
+type Table = "user" | "workspace" | "members" | "chat" | "message"
 
 class Database {
     #database: Connection | null = null;
@@ -50,6 +50,18 @@ class Database {
         process.exit(1)
     }
 
+    async startTransaction() {
+        return await (await this.getConnection()).beginTransaction()
+    }
+
+    async transactionCommit() {
+        return await (await this.getConnection()).commit()
+    }
+
+    async transactionRollback() {
+        return await (await this.getConnection()).rollback()
+    }
+
     async getConnection(): Promise<Connection> {
         return await this.connect();
     }
@@ -68,6 +80,10 @@ class Database {
                 query = createUserTableQ()
                 break
             case "workspace":
+                query = createWorkspacesTable()
+                break
+            case "members":
+                query = createMembersTable()
                 break
             case "chat":
                 break
@@ -84,8 +100,7 @@ class Database {
             logger.info({ result, fields })
         } catch (err) {
             logger.error(`error creating ${table} table`)
-            logger.error(err)
-            return
+            throw err
         }
     }
 
