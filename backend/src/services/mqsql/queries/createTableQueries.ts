@@ -1,4 +1,4 @@
-export const createUsersTable = () => {
+export const createUsersTableQ = () => {
     return `
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -21,7 +21,7 @@ export const createUsersTable = () => {
 }
 
 
-export const createWorkspacesTable = () => {
+export const createWorkspacesTableQ = () => {
     return `
      CREATE TABLE IF NOT EXISTS workspaces (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +38,7 @@ export const createWorkspacesTable = () => {
     `;
 }
 
-export const createMembersTable = () => {
+export const createMembersTableQ = () => {
     return `
         CREATE TABLE IF NOT EXISTS members (
             user_id INT,

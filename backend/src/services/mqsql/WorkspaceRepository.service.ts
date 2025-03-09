@@ -16,7 +16,6 @@ class WorkspaceRepository {
         await this.#database.connect() // makes sure that the database is connected
 
         try {
-            await db.createTable("workspace");
             const [rows] = await this.#database.execute(CREATE_WORKSPACE, [
                 name, creatorId, inviteLink
             ])
@@ -41,7 +40,6 @@ class WorkspaceRepository {
         await this.#database.connect() // makes sure that the database is connected
 
         try {
-            await db.createTable("workspace");
             const [rows] = await this.#database.execute(FIND_WORKSPACE, [
                 workspace.creator_id, workspace.name
             ])

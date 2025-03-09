@@ -1,7 +1,6 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { Member, WorkSpace } from "../../database_schema.js";
 import logger from "../../logger.js";
-import db from "./mysql.service.js";
 import { CREATE_MEMBER, DELETE_MEMBER, FIND_MEMBER } from "./queries/memberQueries.js";
 
 class MemberRepository {
@@ -15,7 +14,6 @@ class MemberRepository {
         await this.#database.connect() // makes sure that the database is connected
 
         try {
-            await db.createTable("members");
             const [rows] = await this.#database.execute(CREATE_MEMBER, [
                 member.user_id,
                 member.workspace_id,
@@ -42,7 +40,6 @@ class MemberRepository {
         await this.#database.connect() // makes sure that the database is connected
 
         try {
-            await db.createTable("members");
             const [rows] = await this.#database.execute(FIND_MEMBER, [
                 member.user_id, member.workspace_id,
             ])

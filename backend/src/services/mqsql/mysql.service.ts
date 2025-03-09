@@ -1,7 +1,8 @@
 import mysql, { Connection } from "mysql2/promise"
 import logger from "../../logger.js"
-import { createMembersTable, createUsersTable as createUserTableQ, createWorkspacesTable } from "./queries/createTableQueries.js";
+import { createMembersTableQ, createUsersTableQ, createWorkspacesTableQ } from "./queries/createTableQueries.js";
 import { deleteUserTable } from "./queries/deleteTableQueries.js";
+import env from "../../zod.js";
 
 type Table = "user" | "workspace" | "members" | "chat" | "message"
 
@@ -11,7 +12,12 @@ class Database {
     #MAX_RETRIES = 10
 
     constructor() {
-        this.connect();
+        this.connect()
+            .then(() => {
+                this.createTable("user");
+                this.createTable("members");
+                this.createTable("workspace");
+            });
     }
 
     async connect() {
@@ -23,10 +29,10 @@ class Database {
         for (let attempt = 1; attempt <= this.#MAX_RETRIES; attempt++) {
             try {
                 this.#database = await mysql.createConnection({
-                    host: 'localhost',
-                    user: 'harud',
-                    password: '123',
-                    database: 'db',
+                    host: env.MYSQL_HOST,
+                    user: env.MYSQL_USER,
+                    password: env.MYSQL_USER_PASS,
+                    database: env.MYSQL_DATABASE,
                 })
 
                 logger.info(`connected to MySQL database with id: ${this.#database.threadId}`)
@@ -51,15 +57,34 @@ class Database {
     }
 
     async startTransaction() {
-        return await (await this.getConnection()).beginTransaction()
+        try {
+            await (await this.getConnection()).beginTransaction()
+            logger.info("***transaction started***")
+        } catch (err) {
+            logger.error("***transaction failed to start***")
+            throw err
+        }
     }
 
     async transactionCommit() {
-        return await (await this.getConnection()).commit()
+        try {
+            await (await this.getConnection()).commit()
+            logger.info("***transaction commited***")
+        } catch (err) {
+            logger.error("***transaction commit failed***")
+            throw err
+        }
     }
 
     async transactionRollback() {
-        return await (await this.getConnection()).rollback()
+        try {
+            await (await this.getConnection()).rollback()
+            logger.info("***transaction rollback successfull***")
+            return
+        } catch (err) {
+            logger.error("***transaction rollback failed***")
+            throw err
+        }
     }
 
     async getConnection(): Promise<Connection> {
@@ -77,13 +102,13 @@ class Database {
         let query = "";
         switch (table) {
             case "user":
-                query = createUserTableQ()
+                query = createUsersTableQ()
                 break
             case "workspace":
-                query = createWorkspacesTable()
+                query = createWorkspacesTableQ()
                 break
             case "members":
-                query = createMembersTable()
+                query = createMembersTableQ()
                 break
             case "chat":
                 break
