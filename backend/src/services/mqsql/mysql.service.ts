@@ -14,10 +14,14 @@ class Database {
     constructor() {
         this.connect()
             .then(() => {
-                this.createTable("user");
-                this.createTable("members");
-                this.createTable("workspace");
             });
+    }
+
+    async initializeDatabase() {
+        await this.createTable("user");
+        await this.createTable("members");
+        await this.createTable("workspace");
+        logger.info("All required tables are initialized");
     }
 
     async connect() {

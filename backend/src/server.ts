@@ -13,8 +13,12 @@ import workSpaceRoutes from "./routes/workspace"
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
 import db from "./services/mqsql/mysql.service.js";
 
+
+db.initializeDatabase()
+
 // initializing the router
 const app = express();
+
 
 app.use(express.json())
 app.use(cookieParser())
@@ -40,6 +44,7 @@ app.listen(PORT, (err) => {
     }
     logger.info(`server running on http://localhost:${PORT}`)
 })
+
 
 process.on("SIGINT", async () => {
     await db.close();

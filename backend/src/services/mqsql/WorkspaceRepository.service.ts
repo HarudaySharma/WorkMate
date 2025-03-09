@@ -2,7 +2,7 @@ import { Connection, ResultSetHeader } from "mysql2/promise";
 import { WorkSpace } from "../../database_schema.js";
 import logger from "../../logger.js";
 import { CREATE_WORKSPACE, DELETE_WORKSPACE, FIND_WORKSPACE } from "./queries/workspaceQueries.js";
-import db from "./mysql.service.js";
+
 
 class WorkspaceRepository {
     #database: Connection
