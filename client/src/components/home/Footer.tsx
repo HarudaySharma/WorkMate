@@ -1,6 +1,6 @@
 import React from 'react'
 import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa'
-import logoWM from '../../assets/logoWMnew-Photoroom.jpg'
+import logoWM from '../../assets/logoWMnew-Photoroom.png'
 
 const Footer = () => {
   return (

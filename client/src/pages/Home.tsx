@@ -6,6 +6,8 @@ import Overview from '../components/home/Overview';
 import Collaborate from '../components/home/Collaborate';
 import Productivity from '../components/home/Productivity';
 import Footer from '../components/home/Footer';
+import Signup from './Signup';
+import Login from './Login';
 
 
 const Home = () => {
@@ -38,6 +40,13 @@ const Home = () => {
 
       <Footer/>
 
+
+
+      <Signup/>
+
+
+
+      <Login/>
 
 
     </div>
