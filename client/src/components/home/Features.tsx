@@ -1,12 +1,10 @@
 import { FolderOutput, ListTodo, MessagesSquare } from "lucide-react";
 
 
-import React from 'react'
-
 const Features = () => {
   return (
     <>
-    <div className='py-16 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-2 font-nunito'>
+    <div id="about" className='py-16 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-2 font-nunito'>
         <h2 className='text-center text-3xl md:text-5xl font-semibold mb-24 text-customBlack'>
           What you <span className='text-customYellow'>can do?</span>
         </h2>

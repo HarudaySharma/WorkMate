@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import bg from '../assets/LoginBG.png';
 import logoWM from '../assets/logoWMnew-Photoroom.png';
 import { Eye, EyeOff } from 'lucide-react';
@@ -6,7 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 const Login = () => {
 
     const [showPassword, setShowPassword] = useState(false);
-    
+
   return (
     <>
           <div className='min-h-screen w-full relative bg-[#B4BDED] font-nunito px-4 sm:px-8 md:px-16 lg:px-32'>
@@ -38,7 +38,7 @@ const Login = () => {
                               <input
                                   type="email"
                                   placeholder="username@gmail.com"
-                                  className="w-full px-3 py-1.5 border bg-white border-gray-300 rounded-lg 
+                                  className="w-full px-3 py-1.5 border bg-white border-gray-300 rounded-lg
                                   focus:border-transparent"
                               />
                           </div>
@@ -48,7 +48,7 @@ const Login = () => {
                               <input
                                   type={showPassword ? "text" : "password"}
                                   placeholder="Password"
-                                  className="w-full px-3 py-1.5 border bg-white border-gray-300 rounded-lg 
+                                  className="w-full px-3 py-1.5 border bg-white border-gray-300 rounded-lg
                                   focus:border-transparent"
                               />
                               <button
@@ -70,7 +70,7 @@ const Login = () => {
 
                           <button
                               type='submit'
-                              className='w-full bg-[#F25019] hover:bg-[#FF5722] text-white font-semibold 
+                              className='w-full bg-[#F25019] hover:bg-[#FF5722] text-white font-semibold
                           py-1.5 rounded-lg transition-colors mt-4 opacity-100'
                           >
                               Sign In

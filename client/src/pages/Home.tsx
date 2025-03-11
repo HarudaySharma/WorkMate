@@ -1,4 +1,3 @@
-import React from 'react'
 import NavBar from '../components/home/NavBar'
 import Hero from '../components/home/Hero';
 import Features from '../components/home/Features'
@@ -6,51 +5,40 @@ import Overview from '../components/home/Overview';
 import Collaborate from '../components/home/Collaborate';
 import Productivity from '../components/home/Productivity';
 import Footer from '../components/home/Footer';
-import Signup from './Signup';
-import Login from './Login';
 
 
 const Home = () => {
-  return (
-    <div className='font-nunito min-h-screen bg-white'>
+    return (
+        <div className='font-nunito min-h-screen bg-white'>
 
-      <NavBar /> 
+            <NavBar />
 
-      <Hero/>
+            <Hero />
 
-      {/* This is the Features Section "What you can do?" */}
+            {/* This is the Features Section "What you can do?" */}
 
-      <Features/>
+            <Features />
 
-      {/*Our Features Section*/}
+            {/*Our Features Section*/}
 
-      <Overview/>
-
-
-      {/*Start collaborating Instantly Section */}
-
-      <Collaborate/>
+            <Overview />
 
 
-      {/*Boost team Productivity*/}
+            {/*Start collaborating Instantly Section */}
 
-      <Productivity/>
-
-      {/*Footer Section*/}\
-
-      <Footer/>
+            <Collaborate />
 
 
+            {/*Boost team Productivity*/}
 
-      <Signup/>
+            <Productivity />
 
+            {/*Footer Section*/}\
 
+            <Footer />
 
-      <Login/>
-
-
-    </div>
-  )
+        </div>
+    )
 }
 
 export default Home
