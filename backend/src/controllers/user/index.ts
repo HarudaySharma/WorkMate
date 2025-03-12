@@ -7,6 +7,22 @@ import { Errorr } from "../../middlewares/error.middleware.js";
 import UserRepository from "../../services/mqsql/UserRepository.service.js";
 
 
+export const userInfo = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (user === undefined) {
+        next(new Errorr("not authorized to get user information", StatusCodes.UNAUTHORIZED))
+        return
+    }
+
+    res.status(StatusCodes.OK).json({
+        profilePicture: user.profile_picture,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+    })
+
+    return
+}
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (user === undefined) {

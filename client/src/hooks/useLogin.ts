@@ -3,25 +3,24 @@ import env from "../zod"
 import { ErrorFormat } from "../types"
 
 interface LoginData {
-    name?: string,
-    username: string,
-    email: string,
+    username?: string,
+    email?: string,
     password: string,
 }
 
 
-const useSignUp = () => {
+const useLogIn = () => {
 
-    const [signInState, setSignInState] = useState<"successfull" | "un-successfull" | "not-initiated" | "initiated">("not-initiated")
+    const [logInState, setLogInState] = useState<"successfull" | "un-successfull" | "not-initiated" | "initiated">("not-initiated")
     const [error, setError] = useState<ErrorFormat | null>(null)
 
 
-    const signUp = async (data: LoginData) => {
+    const logIn = async (data: LoginData) => {
         try {
-            setSignInState("initiated")
+            setLogInState("initiated")
             setError(null)
 
-            const resp = await fetch(`${env.VITE_API_URL}/api/auth/signup`, {
+            const resp = await fetch(`${env.VITE_API_URL}/api/auth/login`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -37,12 +36,12 @@ const useSignUp = () => {
                     message,
                     statusCode,
                 })
-                setSignInState("un-successfull")
+                setLogInState("un-successfull")
                 return
             }
 
             setError(null)
-            setSignInState("successfull")
+            setLogInState("successfull")
 
         } catch (err: unknown) {
             console.log({ err })
@@ -51,12 +50,12 @@ const useSignUp = () => {
                 message: err.message || "unknown error",
                 statusCode: err.statusCode || 500,
             })
-            setSignInState("un-successfull")
+            setLogInState("un-successfull")
         }
 
     }
 
-    return { signInState, error, signUp }
+    return { logInState, error, logIn }
 }
 
-export default useSignUp
+export default useLogIn

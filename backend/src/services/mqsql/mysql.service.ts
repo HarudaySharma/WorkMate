@@ -1,10 +1,10 @@
 import mysql, { Connection } from "mysql2/promise"
 import logger from "../../logger.js"
 import { createMembersTableQ, createUsersTableQ, createWorkspacesTableQ } from "./queries/createTableQueries.js";
-import { deleteUserTable } from "./queries/deleteTableQueries.js";
+import { deleteMembersTable, deleteUserTable, deleteWorkspaceTable } from "./queries/deleteTableQueries.js";
 import env from "../../zod.js";
 
-type Table = "user" | "workspace" | "members" | "chat" | "message"
+type Table = "users" | "workspaces" | "members" | "chat" | "messages"
 
 class Database {
     #database: Connection | null = null;
@@ -18,9 +18,12 @@ class Database {
     }
 
     async initializeDatabase() {
-        await this.createTable("user");
+        // await this.deleteTable("members")
+        // await this.deleteTable("workspaces")
+        // await this.deleteTable("users")
+        await this.createTable("users");
+        await this.createTable("workspaces");
         await this.createTable("members");
-        await this.createTable("workspace");
         logger.info("All required tables are initialized");
     }
 
@@ -105,10 +108,10 @@ class Database {
     async createTable(table: Table) {
         let query = "";
         switch (table) {
-            case "user":
+            case "users":
                 query = createUsersTableQ()
                 break
-            case "workspace":
+            case "workspaces":
                 query = createWorkspacesTableQ()
                 break
             case "members":
@@ -116,7 +119,7 @@ class Database {
                 break
             case "chat":
                 break
-            case "message":
+            case "messages":
                 break
         }
 
@@ -134,20 +137,25 @@ class Database {
     }
 
     async deleteTable(table: Table) {
-        logger.info("deleting user table...")
 
         let query = ``;
         switch (table) {
-            case "user":
+            case "users":
                 query = deleteUserTable()
                 break
-            case "workspace":
+            case "workspaces":
+                query = deleteWorkspaceTable()
                 break
             case "chat":
                 break
-            case "message":
+            case "members":
+                query = deleteMembersTable()
+                break;
+            case "messages":
                 break
         }
+
+        logger.info(`deleting ${table} table...`)
 
         this.#database = await this.getConnection()
 

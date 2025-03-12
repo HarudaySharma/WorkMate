@@ -5,7 +5,6 @@ import { Errorr } from "../../middlewares/error.middleware.js";
 import WorkspaceRepository from "../../services/mqsql/WorkspaceRepository.service.js";
 import db from "../../services/mqsql/mysql.service.js";
 import MemberRepository from "../../services/mqsql/MemberRepository.service.js";
-import logger from "../../logger.js";
 
 
 export const createWorkspace = async (req: Request, res: Response, next: NextFunction) => {

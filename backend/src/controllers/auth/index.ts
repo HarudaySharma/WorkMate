@@ -60,6 +60,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 
     const { username, name, email, password } = req.body;
 
+    console.log(req.body)
     if (username === undefined || email === undefined || password === undefined) {
         next(new Errorr("Insufficient data provided", StatusCodes.BAD_REQUEST));
         return

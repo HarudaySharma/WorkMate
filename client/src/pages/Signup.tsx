@@ -3,7 +3,9 @@ import bg from '../assets/SignUp-bg.png';
 import logoWM from '../assets/logoWMnew-Photoroom.png';
 import { EyeOff, Eye } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { useNavigate } from "react-router-dom";
 import useSignUp from '../hooks/useSignUp';
+import useAuth from '../hooks/useAuth';
 
 
 interface IFormInput {
@@ -16,34 +18,35 @@ interface IFormInput {
 
 const Signup = () => {
 
+    const navigate = useNavigate();
+
     const { register, handleSubmit, watch, formState: {
         errors,
         isSubmitting,
-        isSubmitSuccessful,
     } } = useForm<IFormInput>();
 
-    const { login, isLoading, error } = useSignUp()
+    const { signUp, signInState, error } = useSignUp()
+    const { refetch } = useAuth()
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
 
     const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-        setSuccessMessage("")
-
-        await login({
+        await signUp({
             name: data.name,
             username: data.username,
             password: data.password,
             email: data.email,
         })
 
-        setSuccessMessage("form submitted successfully")
     }
 
     useEffect(() => {
-        console.log({ isSubmitting, isSubmitSuccessful })
-    }, [isSubmitting, isSubmitSuccessful])
+        if (signInState === "successfull") {
+            refetch()
+            //setTimeout(() => navigate("/user"), 2000)
+        }
+    }, [signInState, navigate, refetch])
 
     return (
         <>
@@ -178,24 +181,35 @@ const Signup = () => {
                             <button
                                 type='submit'
                                 className='w-full bg-[#F25019] hover:bg-[#FF5722] text-white font-semibold
-                          py-1.5 rounded-lg transition-colors mt-4 opacity-100'
+                          py-1.5 rounded-lg transition-colors mt-4 opacity-100 hover:cursor-pointer'
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? "Submitting..." : "Sign Up"}
                             </button>
-                            {isSubmitSuccessful &&
-                                <p
-                                    className='text-green-500 font-semibold'
-                                >
-                                    {successMessage}
-                                </p>}
-                            {error &&
-                                <p
-                                    className='text-red-500 font-semibold'
-                                >
-                                    {<pre>{error}</pre>}
-                                </p>}
+                            <div title="meta data">
+                                {signInState === "successfull" &&
+                                    <p
+                                        className='text-green-500 font-semibold'
+                                    >
+                                        Account created successfully
+                                    </p>
+                                }
+                                {signInState === "un-successfull" &&
+                                    <p
+                                        className='text-red-500 font-semibold'
+                                    >
+                                        Failed to create account, Try Again!
+                                    </p>
+                                }
+                                {error &&
+                                    <p
+                                        className='text-red-500 font-semibold'
+                                    >
+                                        Error: {error.message}
+                                    </p>
+                                }
 
+                            </div>
                             <div className='text-center mt-3'>
                                 <p className='text-sm text-gray-600'>Or Continue With</p>
                                 <div className='flex justify-center gap-4 mt-3'>

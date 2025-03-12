@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 
 import env from "./zod.js";
@@ -11,14 +12,22 @@ import userRoutes from "./routes/user"
 import workSpaceRoutes from "./routes/workspace"
 
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
-import db from "./services/mqsql/mysql.service.js";
 
+import db from "./services/mqsql/mysql.service.js";
 
 db.initializeDatabase()
 
 // initializing the router
 const app = express();
 
+
+app.use(cors({
+    origin: [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
+    credentials: true,
+}))
 
 app.use(express.json())
 app.use(cookieParser())
