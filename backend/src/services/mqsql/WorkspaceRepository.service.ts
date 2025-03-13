@@ -1,7 +1,7 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { WorkSpace } from "../../database_schema.js";
 import logger from "../../logger.js";
-import { CREATE_WORKSPACE, DELETE_WORKSPACE, FIND_WORKSPACE } from "./queries/workspaceQueries.js";
+import { CREATE_WORKSPACE, DELETE_WORKSPACE, FIND_WORKSPACE, FIND_WORKSPACE_BY_ID, FIND_WORKSPACE_BY_INVITE_LINK } from "./queries/workspaceQueries.js";
 
 
 class WorkspaceRepository {
@@ -13,7 +13,7 @@ class WorkspaceRepository {
 
 
     async createWorkspace(name: string, creatorId: number, inviteLink: string) {
-        await this.#database.connect() // makes sure that the database is connected
+        // await this.#database.connect() // makes sure that the database is connected
 
         try {
             const [rows] = await this.#database.execute(CREATE_WORKSPACE, [
@@ -35,9 +35,50 @@ class WorkspaceRepository {
         }
     }
 
+    async findById(id: number) {
+        try {
+            const [rows] = await this.#database.execute(FIND_WORKSPACE_BY_ID, [
+                id,
+            ])
 
-    async findWorkspace(workspace: Pick<WorkSpace, "creator_id" | "name">) {
-        await this.#database.connect() // makes sure that the database is connected
+            if (!Array.isArray(rows)) {
+                return null;
+            }
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows[0] as WorkSpace;
+
+        } catch(err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
+
+    async findByInviteLink(inviteLink: string) {
+        try {
+            const [rows] = await this.#database.execute(FIND_WORKSPACE_BY_INVITE_LINK, [
+                inviteLink,
+            ])
+
+            if (!Array.isArray(rows)) {
+                return null;
+            }
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows[0] as WorkSpace;
+
+        } catch(err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
+
+    async find(workspace: Pick<WorkSpace, "creator_id" | "name">) {
+        // await this.#database.connect() // makes sure that the database is connected
 
         try {
             const [rows] = await this.#database.execute(FIND_WORKSPACE, [

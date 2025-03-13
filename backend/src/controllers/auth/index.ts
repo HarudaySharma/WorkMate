@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const userRepo = new UserRepository(await db.getConnection())
 
-        const user = await userRepo.findUser({ username, email })
+        const user = await userRepo.find({ username, email })
 
         console.log({ user })
         if (user === null) {
@@ -69,7 +69,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const userRepo = new UserRepository(await db.getConnection())
 
-        const user = await userRepo.findUser({ username, email });
+        const user = await userRepo.find({ username, email });
         if (user !== null) {
             next(new Errorr("account already exists with username or email", StatusCodes.CONFLICT)) // conflict
             return
@@ -86,9 +86,9 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
             profile_picture: `https://ui-avatars.com/api/?name=${username}` // default profile pics
         }
 
-        await userRepo.addUser(newUser);
+        await userRepo.add(newUser);
 
-        const addedUser = await userRepo.findUser({ username })
+        const addedUser = await userRepo.find({ username })
         if (addedUser === null) {
             next(new Errorr("failed to find added user in db", StatusCodes.NOT_FOUND))
             return
@@ -127,7 +127,7 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const userRepo = new UserRepository(await db.getConnection())
 
-        const user = await userRepo.findUser({ username, email });
+        const user = await userRepo.find({ username, email });
         if (user !== null) {
             // redirect the user to login user must have already signup using the service provider.
             const token = generateToken({
@@ -156,8 +156,8 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
             profile_picture: profile_picture || `https://ui-avatars.com/api/?name=${username}` // default profile pics
         }
 
-        await userRepo.addUser(newUser);
-        const addedUser = await userRepo.findUser({ username })
+        await userRepo.add(newUser);
+        const addedUser = await userRepo.find({ username })
         if (addedUser === null) {
             next(new Errorr("failed to find added user in db", StatusCodes.NOT_FOUND))
             return

@@ -1,7 +1,7 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { Member, WorkSpace } from "../../database_schema.js";
 import logger from "../../logger.js";
-import { CREATE_MEMBER, DELETE_MEMBER, FIND_MEMBER } from "./queries/memberQueries.js";
+import { ADD_MEMBER, DELETE_MEMBER, FIND_MEMBER } from "./queries/memberQueries.js";
 
 class MemberRepository {
     #database: Connection
@@ -10,11 +10,11 @@ class MemberRepository {
         this.#database = db
     }
 
-    async createMember(member: Member) {
-        await this.#database.connect() // makes sure that the database is connected
+    async add(member: Member) {
+        //await this.#database.connect() // makes sure that the database is connected
 
         try {
-            const [rows] = await this.#database.execute(CREATE_MEMBER, [
+            const [rows] = await this.#database.execute(ADD_MEMBER, [
                 member.user_id,
                 member.workspace_id,
                 member.role || "",
@@ -36,8 +36,31 @@ class MemberRepository {
     }
 
 
-    async findMember(member: Pick<Member, "user_id" | "workspace_id">) {
-        await this.#database.connect() // makes sure that the database is connected
+    async findByWkspcId(member: Pick<Member, "workspace_id">) {
+        // await this.#database.connect() // makes sure that the database is connected
+
+        try {
+            const [rows] = await this.#database.execute(FIND_MEMBER, [
+                member.workspace_id,
+            ])
+
+            if (!Array.isArray(rows)) {
+                return null;
+            }
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows as Member[];
+
+        } catch (err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
+
+    async find(member: Pick<Member, "user_id" | "workspace_id">) {
+        // await this.#database.connect() // makes sure that the database is connected
 
         try {
             const [rows] = await this.#database.execute(FIND_MEMBER, [
@@ -51,7 +74,7 @@ class MemberRepository {
                 return null;
             }
 
-            return rows[0] as WorkSpace;
+            return rows[0] as Member;
 
         } catch (err) {
             logger.error(err)
@@ -60,8 +83,8 @@ class MemberRepository {
     }
 
 
-    async deleteMember(member: Pick<Member, "user_id" | "workspace_id">) {
-        await this.#database.connect() // makes sure that the database is connected
+    async delete(member: Pick<Member, "user_id" | "workspace_id">) {
+        // await this.#database.connect() // makes sure that the database is connected
 
         logger.info("deleting member...")
 

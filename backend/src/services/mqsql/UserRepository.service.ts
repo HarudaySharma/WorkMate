@@ -1,6 +1,6 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { User } from "../../database_schema.js";
-import { ADD_USER, DELETE_USER, FIND_USER } from "./queries/userQueries.js";
+import { ADD_USER, DELETE_USER, FIND_USER, FIND_USER_BY_ID } from "./queries/userQueries.js";
 import logger from "../../logger.js";
 
 class UserRepository {
@@ -10,8 +10,29 @@ class UserRepository {
         this.#database = db
     }
 
-    async findUser(user: Partial<Pick<User, "username" | "email">>) {
-        await this.#database.connect() // makes sure that the database is connected
+    async findById(userId: number) {
+        try {
+            const [rows] = await this.#database.execute(FIND_USER_BY_ID, [
+                userId,
+            ])
+
+            if (!Array.isArray(rows)) {
+                return null;
+            }
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows[0] as User;
+
+        } catch (err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
+
+    async find(user: Partial<Pick<User, "username" | "email">>) {
+        //await this.#database.connect() // makes sure that the database is connected
 
         if (this.#database === null) { // still not connected to db (check the server logs)
             throw new Error("failed to connect to database")
@@ -38,8 +59,8 @@ class UserRepository {
         }
     }
 
-    async addUser(user: Partial<User>) {
-        await this.#database.connect() // makes sure that the database is connected
+    async add(user: Partial<User>) {
+        // await this.#database.connect() // makes sure that the database is connected
 
         if (this.#database === null) { // still not connected to db (check the server logs)
             throw new Error("failed to connect to database")
@@ -72,8 +93,8 @@ class UserRepository {
         }
     }
 
-    async deleteUser(user: Partial<Pick<User, "username" | "email">>) {
-        await this.#database.connect();
+    async delete(user: Partial<Pick<User, "username" | "email">>) {
+        //await this.#database.connect();
 
         if (this.#database === null) { // still not connected to db (check the server logs)
             throw new Error("failed to connect to database")

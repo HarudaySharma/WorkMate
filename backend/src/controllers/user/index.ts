@@ -23,6 +23,7 @@ export const userInfo = async (req: Request, res: Response, next: NextFunction) 
 
     return
 }
+
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (user === undefined) {
@@ -33,7 +34,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     try {
         const userRepo = new UserRepository(await db.getConnection())
 
-        await userRepo.deleteUser({
+        await userRepo.delete({
             username: user.username,
             email: user.email,
         })

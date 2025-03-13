@@ -1,13 +1,20 @@
 import { Router } from "express";
 
 import verifyToken from "../../middlewares/verifyToken.middleware.js";
-import { createWorkspace } from "../../controllers/workspace/index.js";
+import { createWorkspace, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
 
 const router = Router();
 
-router.get(":/workspaceId", );
 // we need to verify whether user is logged in or not, so that we can extract id from itspayload
-router.post("/create", verifyToken, createWorkspace)
+router.get("/:workspaceId", verifyToken, getWorkspace);
+router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
+
+router.put("/", verifyToken, createWorkspace)
+router.patch("/:inviteLink/join", verifyToken, joinWorkspace)
+// INFO:
+//  1. user can create workspace
+//  2. users can join a workspace -> via invite link.
+//  3. what more about workspaces???? ->
 
 // ROUTES
 // type WorkSpace = {
