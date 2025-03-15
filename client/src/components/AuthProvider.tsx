@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect, useCallback } from "react"
 import { ErrorFormat, User } from "../types"
 import { AuthContext } from "../hooks/useAuth"
 import env from "../zod"
+import { GoogleOAuthProvider } from "@react-oauth/google"
 
 function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
@@ -28,9 +29,11 @@ function AuthProvider({ children }: { children: ReactNode }) {
     }, [fetchUserData])
 
     return (
-        <AuthContext.Provider value={{ user, setUser, error, refetch: fetchUserData }}>
-            {children}
-        </AuthContext.Provider >
+        <GoogleOAuthProvider clientId={env.VITE_GOOGLE_CLIENT_ID}>
+            <AuthContext.Provider value={{ user, setUser, error, refetch: fetchUserData }}>
+                {children}
+            </AuthContext.Provider >
+        </GoogleOAuthProvider>
     )
 
 }

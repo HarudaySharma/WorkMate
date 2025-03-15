@@ -14,7 +14,7 @@ const useAuth = () => {
     const context = useContext(AuthContext)
 
     if (!context) {
-        throw Error("accessing user information but not wrapped in AuthProvider")
+        throw Error("accessing user information in a component not wrapped under AuthProvider")
     }
 
     return context;

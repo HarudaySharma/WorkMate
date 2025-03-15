@@ -1,3 +1,4 @@
+
 export default function generatePassword() {
     const str = "ab23$@&)*yo,p{L(^cd0elx-}"
 

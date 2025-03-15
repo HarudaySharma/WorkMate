@@ -24,6 +24,17 @@ export const userInfo = async (req: Request, res: Response, next: NextFunction) 
     return
 }
 
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    if (user === undefined) {
+        next(new Errorr("not authorized to logout the user", StatusCodes.UNAUTHORIZED))
+        return
+    }
+
+    res.clearCookie("access_token")
+    res.status(StatusCodes.OK).json({ success: true })
+}
+
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     if (user === undefined) {

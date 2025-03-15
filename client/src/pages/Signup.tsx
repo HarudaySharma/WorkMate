@@ -6,6 +6,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from "react-router-dom";
 import useSignUp from '../hooks/useSignUp';
 import useAuth from '../hooks/useAuth';
+import OAuth from '../components/OAuth';
 
 
 interface IFormInput {
@@ -213,20 +214,7 @@ const Signup = () => {
                             <div className='text-center mt-3'>
                                 <p className='text-sm text-gray-600'>Or Continue With</p>
                                 <div className='flex justify-center gap-4 mt-3'>
-                                    <button className='p-1.5 border border-gray-300 rounded-full hover:bg-gray-50'>
-                                        <img src='https://www.svgrepo.com/show/475656/google-color.svg' alt='Google'
-                                            className='w-6 h-6' />
-                                    </button>
-
-                                    <button className='p-1.5 border border-gray-300 rounded-full hover:bg-gray-50'>
-                                        <img src='https://www.svgrepo.com/show/512317/github-142.svg' alt='GitHub'
-                                            className='w-6 h-6' />
-                                    </button>
-
-                                    <button className='p-1.5 border border-gray-300 rounded-full hover:bg-gray-50'>
-                                        <img src='https://www.svgrepo.com/show/475647/facebook-color.svg' alt='Facebook'
-                                            className='w-6 h-6 rounded-xl' />
-                                    </button>
+                                    <OAuth/>
                                 </div>
                             </div>
                         </form>

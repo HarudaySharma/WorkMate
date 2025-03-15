@@ -9,3 +9,12 @@ export interface User {
     email: string,
     profilePicture: string,
 }
+
+export interface GoogleUser {
+    sub: string;
+    name: string;
+    given_name: string;
+    email: string;
+    email_verified: boolean;
+    picture: string;
+}

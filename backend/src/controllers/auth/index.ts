@@ -13,6 +13,7 @@ import comparePassword from "../../utils/comparePassword.js";
 import { generateToken } from "../../utils/jwt.js";
 import generatePassword from "../../utils/generatePassword.js";
 import UserRepository from "../../services/mqsql/UserRepository.service.js";
+import generateUsername from "../../utils/generateUsername.js";
 
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
@@ -113,13 +114,12 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 
 }
 
-
 export const oAuth = async (req: Request, res: Response, next: NextFunction) => {
-    logger.info("HIT: /auth/OAuth")
+    logger.info("HIT: /auth/oauth")
 
-    const { username, name, email, profile_picture } = req.body;
+    const { name, email, profile_picture, email_verified } = req.body;
 
-    if (username === undefined || email === undefined) {
+    if (email === undefined) {
         next(new Errorr("Insufficient data provided", StatusCodes.BAD_REQUEST));
         return
     }
@@ -127,8 +127,9 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const userRepo = new UserRepository(await db.getConnection())
 
-        const user = await userRepo.find({ username, email });
+        const user = await userRepo.find({ email });
         if (user !== null) {
+            logger.info("user found in db")
             // redirect the user to login user must have already signup using the service provider.
             const token = generateToken({
                 id: user.id,
@@ -139,11 +140,11 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
             })
 
             res.cookie('access_token', token, defaultCookieOptions())
-            res.status(StatusCodes.OK);
-            //next(new Errorr("account already exists with username or email", StatusCodes.CONFLICT)) // conflict
+            res.status(StatusCodes.OK).json({success: true});
             return
         }
 
+        const username = generateUsername(name)
         const pass = generatePassword()
         const { hashedPass, salt } = await generateHashedPass(pass)
 
@@ -151,6 +152,7 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
             username,
             name,
             email,
+            email_verified,
             hashed_password: hashedPass,
             hash_salt: salt,
             profile_picture: profile_picture || `https://ui-avatars.com/api/?name=${username}` // default profile pics
