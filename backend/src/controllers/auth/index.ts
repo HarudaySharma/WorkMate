@@ -13,8 +13,12 @@ import comparePassword from "../../utils/comparePassword.js";
 import { generateToken } from "../../utils/jwt.js";
 import generatePassword from "../../utils/generatePassword.js";
 import UserRepository from "../../services/mqsql/UserRepository.service.js";
-import generateUsername from "../../utils/generateUsername.js";
+import { AuthProvider } from "../../types/index.js";
+import fetchOAuthUser from "../../utils/fetchUserDetails.js";
+import generateUID from "../../utils/generateUID.js";
 
+//
+// TODO: Testing these routes extensively
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: /auth/login")
@@ -26,7 +30,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
         const user = await userRepo.find({ username, email })
 
-        console.log({ user })
+        logger.info({ user })
         if (user === null) {
             next(new Errorr("user not found", StatusCodes.NOT_FOUND))
             return
@@ -61,7 +65,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 
     const { username, name, email, password } = req.body;
 
-    console.log(req.body)
+    logger.info(req.body)
     if (username === undefined || email === undefined || password === undefined) {
         next(new Errorr("Insufficient data provided", StatusCodes.BAD_REQUEST));
         return
@@ -84,7 +88,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
             email,
             hashed_password: hashedPass,
             hash_salt: salt,
-            profile_picture: `https://ui-avatars.com/api/?name=${username}` // default profile pics
+            profile_picture: `https://ui-avatars.com/api/?name=${username}`, // default profile pics
         }
 
         await userRepo.add(newUser);
@@ -117,17 +121,30 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
 export const oAuth = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: /auth/oauth")
 
-    const { name, email, profile_picture, email_verified } = req.body;
+    const { provider } = req.params as { provider: AuthProvider };
 
-    if (email === undefined) {
+    const { code } = req.body;
+    logger.info({ provider, code })
+
+    let u: Partial<User> | undefined = undefined;
+    try {
+        u = await fetchOAuthUser(code, provider)
+    } catch (err) {
+        logger.error(err)
+        next(new Errorr("", StatusCodes.INTERNAL_SERVER_ERROR))
+        return
+    }
+
+    if (u === null || u === undefined || u.email === undefined) {
         next(new Errorr("Insufficient data provided", StatusCodes.BAD_REQUEST));
         return
     }
+
     // check for the user in db
     try {
         const userRepo = new UserRepository(await db.getConnection())
 
-        const user = await userRepo.find({ email });
+        const user = await userRepo.find({ email: u.email });
         if (user !== null) {
             logger.info("user found in db")
             // redirect the user to login user must have already signup using the service provider.
@@ -140,22 +157,21 @@ export const oAuth = async (req: Request, res: Response, next: NextFunction) => 
             })
 
             res.cookie('access_token', token, defaultCookieOptions())
-            res.status(StatusCodes.OK).json({success: true});
+            res.status(StatusCodes.OK).json({ success: true });
             return
         }
 
-        const username = generateUsername(name)
-        const pass = generatePassword()
-        const { hashedPass, salt } = await generateHashedPass(pass)
+        const username = u.name + generateUID()
+        const { hashedPass, salt } = await generateHashedPass(generatePassword())
 
         const newUser: Partial<User> = {
             username,
-            name,
-            email,
-            email_verified,
+            name: u.name,
+            email: u.email,
+            email_verified: u.email_verified,
             hashed_password: hashedPass,
             hash_salt: salt,
-            profile_picture: profile_picture || `https://ui-avatars.com/api/?name=${username}` // default profile pics
+            profile_picture: u.profile_picture || `https://ui-avatars.com/api/?name=${username}`, // default profile pics
         }
 
         await userRepo.add(newUser);

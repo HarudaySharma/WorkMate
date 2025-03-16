@@ -18,3 +18,5 @@ export interface GoogleUser {
     email_verified: boolean;
     picture: string;
 }
+
+export type AuthProvider = "google" | "github" | "facebook";

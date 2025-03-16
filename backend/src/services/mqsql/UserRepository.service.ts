@@ -31,7 +31,7 @@ class UserRepository {
         }
     }
 
-    async find(user: Partial<Pick<User, "username" | "email">>) {
+    async find(user: Partial<Pick<User, "username" | "email" >>) {
         //await this.#database.connect() // makes sure that the database is connected
 
         if (this.#database === null) { // still not connected to db (check the server logs)
