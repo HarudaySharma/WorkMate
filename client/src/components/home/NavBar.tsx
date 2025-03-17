@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import logoWM from '../../assets/logoWMnew-Photoroom.png'
 import { Menu, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import DarkModetoggler from '../DarkModetoggler';
 
 const NavBar = () => {
 
@@ -19,7 +20,7 @@ const NavBar = () => {
 
     return (
         <>
-            <nav className='font-nunito relative'>
+            <nav className='font-nunito relative bg-white dark:bg-[#1E1E1E]'>
                 <div className='flex items-center justify-between px-4 sm:px-8 md:px-12 lg:mx-12 py-3'>
                     {/*left side of nav bar - logo and name always visible*/}
                     <div className='flex items-center gap-2'>
@@ -28,37 +29,50 @@ const NavBar = () => {
                             alt='WorkMate Logo'
                             className='h-10 w-auto sm:h-10'
                         />
-                        <span className='text-2xl sm:text-3xl font-bold text-customBlack'>WorkMate</span>
+                        <span className='text-2xl sm:text-3xl font-bold text-customBlack dark:text-gray-100'>WorkMate</span>
                     </div>
 
 
                     {/* mid part of navBar - only visible on larger screen*/}
                     <div className='hidden md:flex gap-9 mr-auto ml-12 py-2.5'>
                         <NavLink
-                            className='text-lg text-gray-700 font-semibold hover:text-white hover:font-medium hover:bg-customBlue px-3 py-0.5 rounded-md'
+                            className='text-lg text-gray-700 font-semibold hover:text-white hover:font-medium
+                             hover:bg-customBlue px-3 py-0.5 rounded-md dark:hover:bg-transparent dark:hover:border-customBlue
+                             dark:hover:border-2 dark:text-gray-100 '
                             to={"/login"}
                         >
                             Log In
                         </NavLink>
-                        <span className='py-1'>/</span>
+                        <span className='py-1 dark:text-gray-100'>/</span>
                         <NavLink
-                            className='text-lg text-gray-700 font-semibold hover:text-white hover:font-medium hover:bg-customYellow px-3 py-0.5 rounded-md'
+                            className='text-lg text-gray-700 font-semibold hover:text-white hover:font-medium
+                             hover:bg-customYellow px-3 py-0.5 rounded-md dark:hover:bg-transparent dark:hover:border-customYellow
+                             dark:hover:border-2 dark:text-gray-100'
                             to={"/signup"}
                         >
                             Sign Up
                         </NavLink>
                         <button
-                            className='text-lg text-gray-700 font-semibold hover:text-customBlack hover:font-bold'
+                            className='text-lg text-gray-700 font-semibold hover:text-customBlack hover:font-bold
+                            dark:hover:text-gray-400 dark:text-gray-100'
                             onClick={() => scroll("about")}
                         >
                             About
                         </button>
                     </div>
 
+                    {/*Dark Mode Toggle button */}
+
+                    <div>
+                        <DarkModetoggler/>
+                    </div>
+
                     {/*right part of div - only visible on larger screen*/}
 
                     <div className='hidden md:block'>
-                        <button className='bg-customYellow px-8 lg:px-12 py-2.5 font-semibold rounded-lg tracking-wide text-customBlack hover:font-bold font-nunito hover:bg-yellow-500'>
+                        <button className='bg-customYellow px-8 lg:px-12 py-2.5 font-semibold rounded-lg 
+                        tracking-wide text-customBlack hover:font-bold font-nunito hover:bg-yellow-500
+                        dark:border-customYellow dark:border-2 dark:bg-customBlack dark:text-gray-100 dark:hover:text-gray-700'>
                             CREATE WORKSPACE
                         </button>
                     </div>
