@@ -54,7 +54,7 @@ const NavBar = () => {
                         </NavLink>
                         <button
                             className='text-lg text-gray-700 font-semibold hover:text-customBlack hover:font-bold
-                            dark:hover:text-gray-400 dark:text-gray-100'
+                            dark:hover:text-gray-400 dark:text-customYellow'
                             onClick={() => scroll("about")}
                         >
                             About
@@ -80,7 +80,7 @@ const NavBar = () => {
                     {/*hamburger menu button - only visible on smaller screen*/}
 
                     <button
-                        className='md:hidden text-customBlack p-2'
+                        className='md:hidden text-customBlack p-2 dark:text-amber-50'
                         onClick={toggleMenu}
                         aria-label="Toggle Menu"
                     >
@@ -92,15 +92,22 @@ const NavBar = () => {
                 {/*Mobile menu only visible when toggled on small screen*/}
 
                 {isMenuOpen && (
-                    <div className='md:hidden absolute w-full bg-white shadow-lg z-50 py-4 px-6 flex flex-col gap-4'>
+                    <div className='md:hidden absolute w-full bg-white shadow-lg z-50 py-4 px-6 flex flex-col gap-4 dark:bg-[#333333]'>
                         <button
-                            className='text-lg text-gray-700 font-semibold hover:text-white hover:bg-customBlue py-2 px-4 rounded-md text-left'
+                            className='text-lg text-gray-700 font-semibold hover:text-white hover:bg-customBlue
+                             py-2 px-4 rounded-md text-left dark:text-amber-50 dark:hover:bg-[#333333]
+                              dark:hover:border-customBlue dark:hover:border-2'
                         >Log In</button>
                         <button
-                            className='text-lg text-gray-700 font-semibold hover:text-white hover:bg-customYellow py-2 px-4 rounded-md text-left'
+                            className='text-lg text-gray-700 font-semibold hover:text-white hover:bg-customYellow
+                             py-2 px-4 rounded-md text-left dark:text-amber-50 dark:hover:bg-[#333333]
+                              dark:hover:border-customYellow dark:hover:border-2'
                         >Sign Up</button>
                         <button
-                            className='text-lg text-gray-700 font-semibold hover:text-white hover:bg-customBlue py-2 px-4 rounded-md text-left'>About</button>
+                            className='text-lg text-gray-700 font-semibold hover:text-white hover:bg-customBlue
+                             py-2 px-4 rounded-md text-left dark:text-amber-50 dark:hover:bg-[#333333]
+                              dark:hover:border-customBlue dark:hover:border-2'
+                        >About</button>
                     </div>
                 )}
 

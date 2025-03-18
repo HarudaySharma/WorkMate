@@ -9,7 +9,7 @@ import Footer from '../components/home/Footer';
 
 const Home = () => {
     return (
-        <div className='font-nunito min-h-screen bg-white dark:bg-[#1E1E1E]'>
+        <div className='font-nunito min-h-screen bg-white'>
 
             <NavBar />
 
@@ -33,7 +33,7 @@ const Home = () => {
 
             <Productivity />
 
-            {/*Footer Section*/}\
+            {/*Footer Section*/}
 
             <Footer />
 

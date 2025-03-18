@@ -7,7 +7,8 @@ const Hero = () => {
     <>
           <div className='flex flex-col lg:flex-row relative overflow-hidden font-nunito'>
               {/*left side with content and color blue and half diagonal cut */}
-              <div className='w-full lg:3/5 bg-customBlue text-white p-8 sm:p-16 md:p-24 lg:p-32 relative'>
+              <div className='w-full lg:3/5 bg-customBlue text-white p-8 sm:p-16 md:p-24 lg:p-32 relative
+              dark:bg-[#242424]'>
 
                   {/*gradient styling waves */}
                   <div className='absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-60 transform rotate-[-8deg]'></div>
@@ -33,10 +34,11 @@ const Hero = () => {
                   </div>
 
                   {/*Diagonal cut effect - reversed direction*/}
-                  <div className='hidden lg:block absolute top-0 right-0 h-full w-24 lg:w-48 bg-white transform translate-x-1/2 skew-x-[-14deg]'></div>
+                  <div className='hidden lg:block absolute top-0 right-0 h-full w-24 lg:w-48
+                   bg-white transform translate-x-1/2 skew-x-[-14deg] dark:bg-[#242424]'></div>
               </div>
               {/*right side empty for now*/}
-              <div className='hidden lg:block lg:w-2/5 bg-white'></div>
+              <div className='hidden lg:block lg:w-2/5 bg-white dark:bg-[#242424]'></div>
 
           </div>
     </>

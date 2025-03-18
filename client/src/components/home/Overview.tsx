@@ -4,9 +4,9 @@ import React from 'react'
 const Overview = () => {
   return (
     <>
-    <div className='py-16 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32'>
+    <div className='py-16 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 dark:bg-[#242424]'>
         <div className='max-w-6xl mx-auto'>
-          <h2 className='text-3xl md:text-5xl font-semibold mb-12 text-center'>
+          <h2 className='text-3xl md:text-5xl font-semibold mb-12 text-center dark:text-amber-50'>
             Our <span className='text-customYellow'>Features</span>
           </h2>
 
@@ -14,7 +14,7 @@ const Overview = () => {
             {/*Left side Circle Design*/}
             <div className='relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] flex-shrink-0'>
               {/*Outer Dashed Circle*/}
-              <div className='absolute inset-0 rounded-full border-2 border-dashed border-gray-400'></div>
+              <div className='absolute inset-0 rounded-full border-2 border-dashed border-gray-400 dark:border-gray-200'></div>
 
               {/*Inner Dashed Circle*/}
               <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[75%] h-[75%]
@@ -46,9 +46,9 @@ const Overview = () => {
 
             {/*Right Side Text Content*/}
             <div className='flex-1'>
-              <h3 className='text-3xl md:text-4xl font-bold text-customBlack mb-6'>
+              <h3 className='text-3xl md:text-4xl font-bold text-customBlack mb-6 dark:text-amber-50'>
                 Manage Everything in one <span className='border-b-customYellow border-b-4'>workspace</span></h3>
-              <p className='text-gray-600 text-lg leading-relaxed'>
+              <p className='text-gray-600 text-lg leading-relaxed dark:text-gray-300'>
                 Stay connected with real-time chat, collaborate seamlessly through easy file sharing, 
                 and manage tasks effortlessly with an interactive Kanban board. 
                 Plan efficiently using the meeting scheduler, and track team progress with powerful analytics & insights.
