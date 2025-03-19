@@ -66,7 +66,7 @@ const Signup = () => {
                     <div className='w-full max-w-md  backdrop-filter backdrop-blur-lg  rounded-3xl shadow-2xl shadow-[#6b6a4e] p-4 sm:p-6 dark:bg-[#2c2b2b] dark:shadow-gray-700'>
                         {/*Logo*/}
                         <div className='flex justify-start mb-2 pt-3 sm:pt-5'>
-                            <img src={logoWM} alt='logo' className='sm:h-6 md:h-10' />
+                            <img src={logoWM} alt='logo' className='h-10 sm:h-12' />
                         </div>
 
                         {/*SignUp-from*/}
