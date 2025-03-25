@@ -11,6 +11,7 @@ router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
 
 router.put("/", verifyToken, createWorkspace)
 router.patch("/:inviteLink/join", verifyToken, joinWorkspace)
+
 // INFO:
 //  1. user can create workspace
 //  2. users can join a workspace -> via invite link.

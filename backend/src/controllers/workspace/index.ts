@@ -7,6 +7,7 @@ import db from "../../services/mqsql/mysql.service.js";
 import MemberRepository from "../../services/mqsql/MemberRepository.service.js";
 import UserRepository from "../../services/mqsql/UserRepository.service.js";
 import logger from "../../logger.js";
+import Workmate from "../../services/workmate/workmate.service.js";
 
 export const getWorkspaceMembers = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: GET /workspace/members")
@@ -156,6 +157,15 @@ export const joinWorkspace = async (req: Request, res: Response, next: NextFunct
 
     try {
         const wkspcRepo = new WorkspaceRepository(await db.getConnection())
+        const workmate = new Workmate(db)
+
+        const ret = await workmate.joinWorkspace({
+            userId: userId,
+            inviteLink: inviteLink,
+        })
+
+        console.log(typeof ret)
+
 
         await db.startTransaction()
 
@@ -205,54 +215,21 @@ export const createWorkspace = async (req: Request, res: Response, next: NextFun
     }
 
     try {
-        await db.startTransaction()
-
-        // create the workspace
-        const wkspcRepo = new WorkspaceRepository(await db.getConnection());
-
-        // checking if the workspace with the name is already created by the user
-        let wkspc = await wkspcRepo.find({
-            creator_id: userId,
+        const workmate = new Workmate(db);
+        const success = await workmate.createWorkspace({
             name: name,
-        });
-
-        if (wkspc !== null) {
-            await db.transactionRollback()
-
-            next(new Errorr(`workspace with name: ${name} is already present, please choose different name`, StatusCodes.BAD_REQUEST));
-            return;
-        }
-
-
-        await wkspcRepo.createWorkspace(name, userId, inviteLink);
-
-        // get the newly created workspace
-        wkspc = await wkspcRepo.find({
-            creator_id: userId,
-            name: name,
-        });
-
-        if (wkspc === null) {
-            await db.transactionRollback()
-
-            next(new Errorr("failed to find workspace", StatusCodes.INTERNAL_SERVER_ERROR));
-            return;
-        }
-
-
-        const mbrsRepo = new MemberRepository(await db.getConnection());
-        await mbrsRepo.add({
-            workspace_id: wkspc.id,
-            user_id: userId,
-            role: "admin",
+            creatorId: userId,
+            inviteLink: inviteLink,
         })
 
-        await db.transactionCommit()
+        if (!success) {
+            next(new Errorr("failed to create workspace", StatusCodes.INTERNAL_SERVER_ERROR));
+            return
+        }
 
         res.status(StatusCodes.OK).json({ message: "created workspace" })
     } catch (err) {
-        await db.transactionRollback()
-        next(new Errorr("failed to create workspace", StatusCodes.INTERNAL_SERVER_ERROR));
+        next(err as Errorr);
     }
 }
 

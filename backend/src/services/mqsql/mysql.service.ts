@@ -6,7 +6,7 @@ import env from "../../zod.js";
 
 type Table = "users" | "workspaces" | "members" | "chat" | "messages"
 
-class Database {
+export class Database {
     #database: Connection | null = null;
 
     #MAX_RETRIES = 10
