@@ -8,8 +8,10 @@ const router = Router();
 // we need to verify whether user is logged in or not, so that we can extract id from itspayload
 router.get("/:workspaceId", verifyToken, getWorkspace);
 router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
+router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
 
 router.put("/", verifyToken, createWorkspace)
+router.delete("/:workspaceId", verifyToken, createWorkspace)
 router.patch("/:inviteLink/join", verifyToken, joinWorkspace)
 
 // INFO:

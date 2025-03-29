@@ -12,7 +12,7 @@ export class Database {
     #MAX_RETRIES = 10
 
     constructor() {
-        this.connect()
+        this.#connect()
             .then(() => {
             });
     }
@@ -27,7 +27,7 @@ export class Database {
         logger.info("All required tables are initialized");
     }
 
-    async connect() {
+    async #connect() {
         if (this.#database !== null) {
             return this.#database;
         }
@@ -95,7 +95,7 @@ export class Database {
     }
 
     async getConnection(): Promise<Connection> {
-        return await this.connect();
+        return await this.#connect();
     }
 
     async close() {

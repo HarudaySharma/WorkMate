@@ -50,8 +50,10 @@ export const createMembersTableQ = () => {
                 -- ON DELETE CASCADE -- will use it later
 
             CONSTRAINT fk_workspace_id FOREIGN KEY (workspace_id)
-                REFERENCES workspaces(id)
+                REFERENCES workspaces(id),
                 -- ON DELETE CASCADE -- will use it later
+
+             UNIQUE KEY uq_user_workspace (user_id, workspace_id)
         );
     `
 }

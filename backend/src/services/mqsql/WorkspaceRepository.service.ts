@@ -1,7 +1,7 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { WorkSpace } from "../../database_schema.js";
 import logger from "../../logger.js";
-import { CREATE_WORKSPACE, DELETE_WORKSPACE, FIND_WORKSPACE, FIND_WORKSPACE_BY_ID, FIND_WORKSPACE_BY_INVITE_LINK } from "./queries/workspaceQueries.js";
+import { CREATE_WORKSPACE, DELETE_WORKSPACE, FIND_USER_WORKSPACES, FIND_WORKSPACE, FIND_WORKSPACE_BY_ID, FIND_WORKSPACE_BY_INVITE_LINK, FIND_WORKSPACE_BY_NAME } from "./queries/workspaceQueries.js";
 
 
 class WorkspaceRepository {
@@ -32,6 +32,46 @@ class WorkspaceRepository {
         } catch (err) {
             logger.error(err)
             throw new Error("failed to execute INSERT query on db")
+        }
+    }
+
+    //TODO:
+    async findUserWorkspaces(userId: number) {
+        try {
+            const [rows] = await this.#database.execute(FIND_USER_WORKSPACES, [
+                userId,
+            ])
+
+            if (!Array.isArray(rows)) {
+                return null;
+            }
+
+            return rows as WorkSpace[];
+
+        } catch(err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
+
+    async findByName(name: string) {
+        try {
+            const [rows] = await this.#database.execute(FIND_WORKSPACE_BY_NAME, [
+                name,
+            ])
+
+            if (!Array.isArray(rows)) {
+                return null;
+            }
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows[0] as WorkSpace;
+
+        } catch(err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
         }
     }
 
