@@ -1,20 +1,20 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
-import { Member, WorkSpace } from "../../database_schema.js";
+import { WorkspaceMember } from "../../database_schema.js";
 import logger from "../../logger.js";
-import { ADD_MEMBER, DELETE_MEMBER, FIND_MEMBER } from "./queries/memberQueries.js";
+import { ADD_WORKSPACE_MEMBER, DELETE_WORKSPACE_MEMBER, FIND_WORKSPACE_MEMBER, FIND_WORKSPACE_MEMBERS_BY_WORKSPACE_ID } from "./queries/workspaceMemberQueries.js";
 
-class MemberRepository {
+class WorkspaceMemberRepository {
     #database: Connection
 
     constructor(db: Connection) {
         this.#database = db
     }
 
-    async add(member: Member) {
+    async add(member: WorkspaceMember) {
         //await this.#database.connect() // makes sure that the database is connected
 
         try {
-            const [rows] = await this.#database.execute(ADD_MEMBER, [
+            const [rows] = await this.#database.execute(ADD_WORKSPACE_MEMBER, [
                 member.user_id,
                 member.workspace_id,
                 member.role || "",
@@ -36,11 +36,11 @@ class MemberRepository {
     }
 
 
-    async findByWkspcId(member: Pick<Member, "workspace_id">) {
+    async findByWkspcId(member: Pick<WorkspaceMember, "workspace_id">) {
         // await this.#database.connect() // makes sure that the database is connected
 
         try {
-            const [rows] = await this.#database.execute(FIND_MEMBER, [
+            const [rows] = await this.#database.execute(FIND_WORKSPACE_MEMBERS_BY_WORKSPACE_ID, [
                 member.workspace_id,
             ])
 
@@ -51,7 +51,7 @@ class MemberRepository {
                 return null;
             }
 
-            return rows as Member[];
+            return rows as WorkspaceMember[];
 
         } catch (err) {
             logger.error(err)
@@ -59,11 +59,11 @@ class MemberRepository {
         }
     }
 
-    async find(member: Pick<Member, "user_id" | "workspace_id">) {
+    async find(member: Pick<WorkspaceMember, "user_id" | "workspace_id">) {
         // await this.#database.connect() // makes sure that the database is connected
 
         try {
-            const [rows] = await this.#database.execute(FIND_MEMBER, [
+            const [rows] = await this.#database.execute(FIND_WORKSPACE_MEMBER, [
                 member.user_id, member.workspace_id,
             ])
 
@@ -74,7 +74,7 @@ class MemberRepository {
                 return null;
             }
 
-            return rows[0] as Member;
+            return rows[0] as WorkspaceMember;
 
         } catch (err) {
             logger.error(err)
@@ -83,13 +83,13 @@ class MemberRepository {
     }
 
 
-    async delete(member: Pick<Member, "user_id" | "workspace_id">) {
+    async delete(member: Pick<WorkspaceMember, "user_id" | "workspace_id">) {
         // await this.#database.connect() // makes sure that the database is connected
 
         logger.info("deleting member...")
 
         try {
-            const [rows] = await this.#database.execute(DELETE_MEMBER, [
+            const [rows] = await this.#database.execute(DELETE_WORKSPACE_MEMBER, [
                 member.user_id, member.workspace_id,
             ])
 
@@ -109,4 +109,4 @@ class MemberRepository {
 
 }
 
-export default MemberRepository;
+export default WorkspaceMemberRepository;

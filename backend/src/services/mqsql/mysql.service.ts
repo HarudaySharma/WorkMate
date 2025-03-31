@@ -1,10 +1,10 @@
 import mysql, { Connection } from "mysql2/promise"
 import logger from "../../logger.js"
-import { createMembersTableQ, createUsersTableQ, createWorkspacesTableQ } from "./queries/createTableQueries.js";
-import { deleteMembersTable, deleteUserTable, deleteWorkspaceTable } from "./queries/deleteTableQueries.js";
+import { createWorkspaceMembersTableQ, createUsersTableQ, createWorkspacesTableQ, createChatsTableQ, createChatMembersTableQ } from "./queries/createTableQueries.js";
+import { deleteWorkspaceMembersTable, deleteUserTable, deleteWorkspaceTable, deleteChatMembersTable, deleteChatsTable } from "./queries/deleteTableQueries.js";
 import env from "../../zod.js";
 
-type Table = "users" | "workspaces" | "members" | "chat" | "messages"
+type Table = "users" | "workspaces" | "chats" | "messages" | "chat_members" | "workspace_members"
 
 export class Database {
     #database: Connection | null = null;
@@ -18,12 +18,17 @@ export class Database {
     }
 
     async initializeDatabase() {
-        // await this.deleteTable("members")
+        // await this.deleteTable("chat_members")
+        // await this.deleteTable("workspace_members")
+        // await this.deleteTable("chats")
         // await this.deleteTable("workspaces")
         // await this.deleteTable("users")
+
         await this.createTable("users");
         await this.createTable("workspaces");
-        await this.createTable("members");
+        await this.createTable("chats");
+        await this.createTable("workspace_members");
+        await this.createTable("chat_members");
         logger.info("All required tables are initialized");
     }
 
@@ -42,7 +47,7 @@ export class Database {
                     database: env.MYSQL_DATABASE,
                 })
 
-                logger.info(`connected to MySQL database with id: ${this.#database.threadId}`)
+                logger.info(`connected to MySQL database "${env.MYSQL_DATABASE}" with id: ${this.#database.threadId}.`)
 
                 return this.#database
             }
@@ -59,7 +64,7 @@ export class Database {
             }
         }
 
-        logger.error("couldn't connect to MySQL database");
+        logger.error(`couldn't connect to MySQL database "${env.MYSQL_DATABASE}."`);
         process.exit(1)
     }
 
@@ -114,10 +119,14 @@ export class Database {
             case "workspaces":
                 query = createWorkspacesTableQ()
                 break
-            case "members":
-                query = createMembersTableQ()
+            case "chats":
+                query = createChatsTableQ()
                 break
-            case "chat":
+            case "workspace_members":
+                query = createWorkspaceMembersTableQ()
+                break
+            case "chat_members":
+                query = createChatMembersTableQ()
                 break
             case "messages":
                 break
@@ -146,21 +155,26 @@ export class Database {
             case "workspaces":
                 query = deleteWorkspaceTable()
                 break
-            case "chat":
+            case "chats":
+                query = deleteChatsTable()
                 break
-            case "members":
-                query = deleteMembersTable()
+            case "workspace_members":
+                query = deleteWorkspaceMembersTable()
+                break;
+            case "chat_members":
+                query = deleteChatMembersTable()
                 break;
             case "messages":
                 break
         }
 
-        logger.info(`deleting ${table} table...`)
 
         this.#database = await this.getConnection()
 
         try {
             const [result, fields] = await this.#database.execute(query)
+
+            logger.info(`${table} table DELETED...`)
             logger.info({ result, fields })
         } catch (err) {
             logger.error(`error deleting the ${table} table`);

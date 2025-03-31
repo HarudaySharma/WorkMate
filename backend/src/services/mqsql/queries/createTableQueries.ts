@@ -20,7 +20,6 @@ export const createUsersTableQ = () => {
     `
 }
 
-
 export const createWorkspacesTableQ = () => {
     return `
      CREATE TABLE IF NOT EXISTS workspaces (
@@ -31,29 +30,101 @@ export const createWorkspacesTableQ = () => {
 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-            CONSTRAINT fk_creator_id FOREIGN KEY (creator_id)
+            CONSTRAINT fk_workspaces_creator_id FOREIGN KEY (creator_id)
                 REFERENCES users(id)
                 -- ON DELETE CASCADE -- will use it later
         );
     `;
 }
 
-export const createMembersTableQ = () => {
+export const createChatsTableQ = () => {
     return `
-        CREATE TABLE IF NOT EXISTS members (
+     CREATE TABLE IF NOT EXISTS chats (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100),
+            type ENUM('group', 'one-one') NOT NULL DEFAULT 'one-one',
+            workspace_id INT,
+
+            last_message_at TIMESTAMP,
+
+            CONSTRAINT fk_chats_workspace_id FOREIGN KEY (workspace_id)
+                REFERENCES workspaces(id)
+                -- ON DELETE CASCADE -- will use it later
+        );
+    `;
+}
+
+
+export const createMessagesTableQ = () => {
+    return `
+     CREATE TABLE IF NOT EXISTS messages (
+            message_id CHAR(36) PRIMARY KEY DEFAULT (UUID());
+            sender_id INT,
+            receiver_id INT,
+            chat_id INT,
+
+            type ENUM('text', 'image', 'audio') NOT NULL,
+
+            text TEXT,
+            image_url VARCHAR(2083), -- maximum url length is 2083 in most of the browsers
+            audio_url VARCHAR(2083), -- maximum url length is 2083 in most of the browsers
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            is_deleted TINYINT(1) DEFAULT 0, -- Boolean field with default value (0 = false)
+
+            CONSTRAINT fk_messages_sender_id FOREIGN KEY (sender_id)
+                REFERENCES users(id)
+                -- ON DELETE CASCADE -- will use it later
+            CONSTRAINT fk_messages_receiver_id FOREIGN KEY (receiver_id)
+                REFERENCES users(id)
+                -- ON DELETE CASCADE -- will use it later
+            CONSTRAINT fk_messages_chat_id FOREIGN KEY (chat_id)
+                REFERENCES chats(id)
+                -- ON DELETE CASCADE -- will use it later
+        );
+    `;
+}
+
+export const createWorkspaceMembersTableQ = () => {
+    return `
+        CREATE TABLE IF NOT EXISTS workspace_members (
             user_id INT,
             workspace_id INT,
-            role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+            role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
 
-            CONSTRAINT fk_user_id FOREIGN KEY (user_id)
+            CONSTRAINT fk_wkspcmbr_user_id FOREIGN KEY (user_id)
                 REFERENCES users(id),
                 -- ON DELETE CASCADE -- will use it later
 
-            CONSTRAINT fk_workspace_id FOREIGN KEY (workspace_id)
+            CONSTRAINT fk_wkspcmbr_workspace_id FOREIGN KEY (workspace_id)
                 REFERENCES workspaces(id),
                 -- ON DELETE CASCADE -- will use it later
 
              UNIQUE KEY uq_user_workspace (user_id, workspace_id)
+        );
+    `
+}
+
+export const createChatMembersTableQ = () => {
+    return `
+        CREATE TABLE IF NOT EXISTS chat_members (
+            user_id INT,
+            chat_id INT,
+
+            role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
+
+            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            CONSTRAINT fk_chatsmbr_user_id FOREIGN KEY (user_id)
+                REFERENCES users(id),
+                -- ON DELETE CASCADE -- will use it later
+
+            CONSTRAINT fk_chatsmbr_chat_id FOREIGN KEY (chat_id)
+                REFERENCES chats(id),
+                -- ON DELETE CASCADE -- will use it later
+
+             UNIQUE KEY uq_user_chat (user_id, chat_id)
         );
     `
 }

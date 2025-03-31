@@ -1,5 +1,5 @@
 import WorkspaceRepository from "../mqsql/WorkspaceRepository.service";
-import MemberRepository from "../mqsql/MemberRepository.service";
+import WorkspaceMemberRepository from "../mqsql/WorkspaceMemberRepository.service";
 import { Database } from "../mqsql/mysql.service";
 import { StatusCodes } from "http-status-codes";
 import logger from "../../logger";
@@ -17,8 +17,11 @@ import {
     GetWorkspaceInfoParams,
     GetUserWorkspacesRet,
     GetWorkspaceMembersRet,
+    GetWorkspaceMembersParams,
+    GetWorkspaceChatsParams,
 } from "../../types/workspace.service.js";
 import UserRepository from "../mqsql/UserRepository.service";
+import ChatRepository from "../mqsql/ChatRepository.service";
 
 
 class Workmate {
@@ -29,16 +32,61 @@ class Workmate {
         this.#db = db;
     }
 
-    async getWorkspaceMembers({ workspaceId }: GetWorkspaceInfoParams): Promise<GetWorkspaceMembersRet> {
+    async getWorkspaceChats({ workspaceId, userId }: GetWorkspaceChatsParams): Promise<any> {
         try {
             // make sure that the user is authorized to recieve the workspace info
-            const mbrsRepo = new MemberRepository(await this.#db.getConnection())
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            // checking if the user is the member of workspace.
+            const mbr = await mbrsRepo.find({
+                workspace_id: workspaceId,
+                user_id: userId,
+            })
+            if (mbr === null) {
+                throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
+            }
+
+
+            // fetch chats from the database.
+            const chatsRepo = new ChatRepository(await this.#db.getConnection())
+
+            const chats = await chatsRepo.findByWkspcId({workspace_id: workspaceId})
+
+            if (chats === null) {
+                throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
+            }
+
+
+        } catch (err) {
+            await this.#db.transactionRollback()
+            if (!(err instanceof WorkmateError)) {
+
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", "failed to get workspace members", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+
+    }
+    async getWorkspaceMembers({ workspaceId, userId }: GetWorkspaceMembersParams): Promise<GetWorkspaceMembersRet> {
+        try {
+            // make sure that the user is authorized to recieve the workspace info
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            // checking if the user is the member of workspace.
+            const mbr = await mbrsRepo.find({
+                workspace_id: workspaceId,
+                user_id: userId,
+            })
+            if (mbr === null) {
+                throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
+            }
 
             const mbrs = await mbrsRepo.findByWkspcId({
                 workspace_id: workspaceId,
             })
             if (mbrs === null) {
-                throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
+                throw new WorkmateError('DATA_INCONSISTENCY_ERROR', `Unexpected data inconsistency: workspace has no members`, StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
             const userRepo = new UserRepository(await this.#db.getConnection())
@@ -103,7 +151,7 @@ class Workmate {
             }
 
             // make sure that the user is authorized to recieve the workspace info
-            const mbrsRepo = new MemberRepository(await this.#db.getConnection())
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
 
             const mbr = await mbrsRepo.find({
                 user_id: userId,
@@ -125,7 +173,6 @@ class Workmate {
         } catch (err) {
             await this.#db.transactionRollback()
             if (!(err instanceof WorkmateError)) {
-
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to find workspace", StatusCodes.INTERNAL_SERVER_ERROR);
             }
@@ -144,11 +191,13 @@ class Workmate {
                 throw new WorkmateError("INTERNAL_ERROR", `something wrong when getting user workspaces`, StatusCodes.INTERNAL_SERVER_ERROR)
             }
 
+            const filteredWkspcs = wkspcs.map(({ invite_link, ...rest }) => rest)
+
             return {
                 success: true,
                 message: "user workspaces retrived successfully",
                 data: {
-                    workspaces: wkspcs,
+                    workspaces: filteredWkspcs,
                 },
             }
 
@@ -203,7 +252,7 @@ class Workmate {
                 throw new WorkmateError("INTERNAL_ERROR", "failed to find workspace", StatusCodes.INTERNAL_SERVER_ERROR)
             }
 
-            const mbrsRepo = new MemberRepository(await this.#db.getConnection());
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection());
             await mbrsRepo.add({
                 workspace_id: wkspc.id,
                 user_id: creatorId,
@@ -244,7 +293,7 @@ class Workmate {
                 throw new WorkmateError("USER_ERROR", "workspace not found, make sure your invite link is valid", StatusCodes.BAD_REQUEST)
             }
 
-            const mbrsRepo = new MemberRepository(await this.#db.getConnection())
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
 
             const mbr = await mbrsRepo.find({
                 user_id: userId,
@@ -261,7 +310,7 @@ class Workmate {
             await mbrsRepo.add({
                 user_id: userId,
                 workspace_id: wkspc.id,
-                role: "user",
+                role: "member",
             })
 
             await this.#db.transactionCommit()
@@ -299,7 +348,7 @@ class Workmate {
                 throw new WorkmateError("USER_ERROR", "no rights to delete the workspace with name: ${name}", StatusCodes.UNAUTHORIZED)
             }
 
-            await wkspcRepo.deleteWorkspace({id: wkspc.id})
+            await wkspcRepo.deleteWorkspace({ id: wkspc.id })
 
             return {
                 success: true,

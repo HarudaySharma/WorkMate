@@ -10,7 +10,6 @@ import { WorkmateError } from "../../types/workspace.service.js";
 
 
 // TODO: test all these routes
-
 export const getWorkspace = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: GET /workspace")
 
@@ -34,7 +33,7 @@ export const getWorkspace = async (req: Request, res: Response, next: NextFuncti
     try {
         const workmate = new Workmate(db)
 
-        const ret = workmate.getWorkspaceInfo({
+        const ret = await workmate.getWorkspaceInfo({
             userId: userId,
             workspaceId: +workspaceId,
         });
@@ -200,7 +199,6 @@ export const getUserWorkspaces = async (req: Request, res: Response, next: NextF
         return
     }
 
-
     try {
         const workmate = new Workmate(db)
 
@@ -265,3 +263,44 @@ export const getWorkspaceMembers = async (req: Request, res: Response, next: Nex
 }
 
 
+export const getWorkspaceChats = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: GET /workspace/chats")
+
+    if (!req.user) {
+        next(new Errorr("no user found, cannot see the workspace chats", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { id: userId } = req.user;
+    if (userId === "" || userId === undefined) {
+        next(new Errorr("invalid user id, cannot see the workspace chats", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { workspaceId } = req.params;
+    if (workspaceId === undefined) {
+        next(new Errorr("no Workspace Id provided", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    try {
+        const workmate = new Workmate(db)
+
+        const ret = await workmate.getWorkspaceMembers({
+            userId: userId,
+            workspaceId: +workspaceId,
+        })
+
+        res.status(StatusCodes.OK).json(ret) // show user the workspace -> redirect them to the workspace
+    } catch (err) {
+        const er = err as WorkmateError;// err will always be of type WorkmateError
+        if (er.type === undefined) {
+            next(new Errorr("internal server error"));
+            return
+        }
+
+        logger.error(er.error)
+        const statusCode = (er.type === "USER_ERROR" ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR);
+        next(new Errorr(er.message, er.httpStatusCode || statusCode))
+    }
+}

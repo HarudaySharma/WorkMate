@@ -1,6 +1,6 @@
-import { Member, User, WorkSpace } from "../database_schema";
+import { WorkspaceMember, User, WorkSpace } from "../database_schema";
 
-type ERROR_TYPE = "USER_ERROR" | "INTERNAL_ERROR";
+type ERROR_TYPE = "USER_ERROR" | "INTERNAL_ERROR" | "DATA_INCONSISTENCY_ERROR";
 
 export class WorkmateError {
     type: ERROR_TYPE;
@@ -54,6 +54,12 @@ export interface GetWorkspaceInfoParams {
 }
 
 export interface GetWorkspaceMembersParams {
+    userId: number;
+    workspaceId: number;
+}
+
+export interface GetWorkspaceChatsParams {
+    userId: number;
     workspaceId: number;
 }
 
@@ -88,6 +94,6 @@ export interface DeleteWorkspaceRet extends WorkmateReturnObj {
 
 export interface GetWorkspaceMembersRet extends WorkmateReturnObj {
     data: {
-        members: (Pick<Member, "role"> & Pick<User, "username"| "name"| "email"| "profile_picture">) []
+        members: (Pick<WorkspaceMember, "role"> & Pick<User, "username"| "name"| "email"| "profile_picture">) []
     }
 }

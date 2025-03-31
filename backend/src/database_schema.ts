@@ -25,33 +25,43 @@ export type WorkSpace = {
     //    // multiple chats in one workspace (one-one or group chats)
 }
 
-type Chat = {
-    id: string, // chat id
+export type Chat = {
+    id: number, // chat id
+    name: string, // type == group ? "group name" : "reciever name"
     type: 'group' | 'one-one',
-    workspaceID: string // Foreign Key (WorkSpace.id)
-    lastMessageAt: Date,
-    participants: Member[]
+    workspace_id: number // Foreign Key (WorkSpace.id)
+    last_message_at: Date | null,
+    // participants: ChatMember[], // chat members
 }
 
-type Message = {
-    sender: string, // Foreign Key (User.id)
-    reciever: string, // Foreign Key (User.id)
-    chatID: string // Foreign Key (Chat.id)
+export type ChatMember = {
+    chat_id: number;
+    user_id: number;
+    joined_at: Date;
+    role: 'admin' | 'member',
+}
+
+export type WorkspaceMember = {
+    user_id: number, // Foreign Key (User.id)
+    workspace_id: number, // Foreign Key (WorkSpace.id)
+    role: 'admin' | 'member',
+}
+
+
+export type Message = {
+    message_id: string, // UUID
+    sender_id: number, // Foreign Key (User.id)
+    reciever_id: number, // Foreign Key (User.id)
+    chat_id: number // Foreign Key (Chat.id)
 
     type: "text" | "image" | "audio",
-    text: string,
-    image: string, // url to the image
-    audio: string, // url to the audio file
-    createdAt: Date,
+    text: string | null,
+    image: string | null, // url to the image
+    audio: string | null, // url to the audio file
+    created_at: Date,
+    is_deleted: boolean
     // optional:
-    // isDeleted: boolean
     // isUpdated: boolean
-}
-
-export type Member = {
-    user_id: number, // Foreign Key (User.id)
-    workspace_id: number, // Foreign Key (User.id)
-    role: "admin" | "user",
 }
 
 type Kanban = { // Board
