@@ -37,54 +37,6 @@ export const createWorkspacesTableQ = () => {
     `;
 }
 
-export const createChatsTableQ = () => {
-    return `
-     CREATE TABLE IF NOT EXISTS chats (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100),
-            type ENUM('group', 'one-one') NOT NULL DEFAULT 'one-one',
-            workspace_id INT,
-
-            last_message_at TIMESTAMP,
-
-            CONSTRAINT fk_chats_workspace_id FOREIGN KEY (workspace_id)
-                REFERENCES workspaces(id)
-                -- ON DELETE CASCADE -- will use it later
-        );
-    `;
-}
-
-
-export const createMessagesTableQ = () => {
-    return `
-     CREATE TABLE IF NOT EXISTS messages (
-            message_id CHAR(36) PRIMARY KEY DEFAULT (UUID());
-            sender_id INT,
-            receiver_id INT,
-            chat_id INT,
-
-            type ENUM('text', 'image', 'audio') NOT NULL,
-
-            text TEXT,
-            image_url VARCHAR(2083), -- maximum url length is 2083 in most of the browsers
-            audio_url VARCHAR(2083), -- maximum url length is 2083 in most of the browsers
-
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-            is_deleted TINYINT(1) DEFAULT 0, -- Boolean field with default value (0 = false)
-
-            CONSTRAINT fk_messages_sender_id FOREIGN KEY (sender_id)
-                REFERENCES users(id)
-                -- ON DELETE CASCADE -- will use it later
-            CONSTRAINT fk_messages_receiver_id FOREIGN KEY (receiver_id)
-                REFERENCES users(id)
-                -- ON DELETE CASCADE -- will use it later
-            CONSTRAINT fk_messages_chat_id FOREIGN KEY (chat_id)
-                REFERENCES chats(id)
-                -- ON DELETE CASCADE -- will use it later
-        );
-    `;
-}
 
 export const createWorkspaceMembersTableQ = () => {
     return `
@@ -104,6 +56,23 @@ export const createWorkspaceMembersTableQ = () => {
              UNIQUE KEY uq_user_workspace (user_id, workspace_id)
         );
     `
+}
+
+export const createChatsTableQ = () => {
+    return `
+     CREATE TABLE IF NOT EXISTS chats (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100),
+            type ENUM('group', 'one-one') NOT NULL DEFAULT 'one-one',
+            workspace_id INT,
+
+            last_message_at TIMESTAMP,
+
+            CONSTRAINT fk_chats_workspace_id FOREIGN KEY (workspace_id)
+                REFERENCES workspaces(id)
+                -- ON DELETE CASCADE -- will use it later
+        );
+    `;
 }
 
 export const createChatMembersTableQ = () => {
@@ -128,3 +97,47 @@ export const createChatMembersTableQ = () => {
         );
     `
 }
+
+export const createMessagesTableQ = () => {
+    return `
+     CREATE TABLE IF NOT EXISTS messages (
+            message_id CHAR(36) PRIMARY KEY NOT NULL,
+            sender_id INT NOT NULL,
+            chat_id INT NOT NULL,
+
+            type ENUM('text', 'image', 'audio') NOT NULL,
+
+            text TEXT DEFAULT NULL,
+            image_url VARCHAR(2083) DEFAULT NULL, -- maximum url length is 2083 in most of the browsers
+            audio_url VARCHAR(2083) DEFAULT NULL, -- maximum url length is 2083 in most of the browsers
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            is_deleted TINYINT(1) DEFAULT 0, -- Boolean field with default value (0 = false)
+
+            CONSTRAINT fk_messages_sender_id FOREIGN KEY (sender_id)
+                REFERENCES users(id),
+                -- ON DELETE CASCADE -- will use it later
+            CONSTRAINT fk_messages_chat_id FOREIGN KEY (chat_id)
+                REFERENCES chats(id)
+                -- ON DELETE CASCADE -- will use it later
+        );
+    `;
+}
+
+export const createMessageRecipientsTableQ = () => {
+    return `
+     CREATE TABLE IF NOT EXISTS message_recipients (
+         message_id CHAR(36) NOT NULL,
+         user_id INT NOT NULL,
+         is_read TINYINT(1) DEFAULT 0,  -- 0 = unread, 1 = read
+         read_at TIMESTAMP NULL DEFAULT NULL, -- When the user read the message
+
+         PRIMARY KEY (message_id, user_id),
+         FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE,
+         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+     );
+    `;
+}
+
+

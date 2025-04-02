@@ -1,7 +1,9 @@
+import { v4 as uuidv4 } from "uuid";
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { Message } from "../../database_schema.js";
 import logger from "../../logger.js";
-import { ADD_MESSAGE, DELETE_MESSAGE, FIND_MESSAGES_BY_CHAT_ID } from "./queries/messageQueries.js";
+import { ADD_MESSAGE, DELETE_MESSAGE, FIND_MESSAGES_BY_CHAT_ID, FIND_MESSAGES_BY_ID as FIND_MESSAGE_BY_MESSAGE_ID } from "./queries/messageQueries.js";
+import { warn } from "console";
 
 class MessageRepository {
     #database: Connection
@@ -10,26 +12,23 @@ class MessageRepository {
         this.#database = db
     }
 
-    async add(message: Omit<Message, "created_at">): Promise<Pick<Message, "message_id">> {
+    async add(message: Omit<Message, "created_at" | "message_id" | "is_deleted">): Promise<Pick<Message, "message_id">> {
         try {
-            const [rows] = await this.#database.execute(ADD_MESSAGE, [
-                message.sender_id, message.reciever_id, message.chat_id,
+            const id = uuidv4();
+            const [result] = await this.#database.execute(ADD_MESSAGE, [
+                id, message.sender_id, message.chat_id,
                 message.type, message.text, message.image, message.audio,
             ])
 
-            if (!rows || !Array.isArray(rows) || rows.length === 0) {
-                throw new Error("Failed to retrieve message_id after insertion.");
+            const header = result as ResultSetHeader
+            if (header.affectedRows === 0) {
+                throw new Error(`Failed to add message: message_id=${id}`)
             }
 
-            const message_id = (rows[0] as { message_id: string })
+            // FIX: the ADD_MESSAGE query (MySQL doesn't support RETURNING keyword)
+            logger.info(`operation successfull (added message: message_id=${id} to db)`)
 
-            if (message_id === undefined) {
-                throw new Error("Failed to retrieve message_id after insertion.");
-            }
-
-            logger.info("operation successfull (added message to db)")
-
-            return message_id;
+            return { message_id: id };
 
         } catch (err) {
             logger.error(err)
@@ -37,6 +36,26 @@ class MessageRepository {
         }
     }
 
+    async findById(message: Pick<Message, "message_id">) {
+        try {
+            const [rows] = await this.#database.execute(FIND_MESSAGE_BY_MESSAGE_ID, [
+                message.message_id,
+            ])
+
+            if (!Array.isArray(rows)) {
+                throw new Error("unexpected database response when selecting message from database")
+            }
+            if (rows.length == 0) {
+                return null;
+            }
+
+            return rows[0] as Message;
+
+        } catch (err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
 
     async findByChatId(message: Pick<Message, "chat_id">) {
         try {
@@ -45,7 +64,7 @@ class MessageRepository {
             ])
 
             if (!Array.isArray(rows)) {
-                return null;
+                throw new Error("unexpected database response when selecting messages from database")
             }
 
             return rows as Message[];

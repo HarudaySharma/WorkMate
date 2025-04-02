@@ -1,5 +1,5 @@
 export type User = {
-    id: string, // (Primary Key)
+    id: number, // (Primary Key)
     name: string,
     username: string // (unique)
     email: string, // (unique)
@@ -51,7 +51,6 @@ export type WorkspaceMember = {
 export type Message = {
     message_id: string, // UUID
     sender_id: number, // Foreign Key (User.id)
-    reciever_id: number, // Foreign Key (User.id)
     chat_id: number // Foreign Key (Chat.id)
 
     type: "text" | "image" | "audio",
@@ -62,6 +61,13 @@ export type Message = {
     is_deleted: boolean
     // optional:
     // isUpdated: boolean
+}
+
+export type MessageRecipient = {
+    message_id: string, // UUID
+    user_id: number, // Foreign Key (User.id)
+    is_read: 0 | 1;
+    read_at: Date | null,
 }
 
 type Kanban = { // Board

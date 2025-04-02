@@ -19,9 +19,17 @@ import {
     GetWorkspaceMembersRet,
     GetWorkspaceMembersParams,
     GetWorkspaceChatsParams,
+    GetWorkspaceChatsRet,
+    CreateChatParams,
+    CreateChatRet,
+    CreateMessageRet,
+    CreateMessageParams,
 } from "../../types/workspace.service.js";
 import UserRepository from "../mqsql/UserRepository.service";
 import ChatRepository from "../mqsql/ChatRepository.service";
+import ChatMemberRepository from "../mqsql/ChatMemberRepository.service";
+import MessageRepository from "../mqsql/MessageRepository.service";
+import MessageRecipientRepository from "../mqsql/MessageRecipientRepository.service";
 
 
 class Workmate {
@@ -32,7 +40,7 @@ class Workmate {
         this.#db = db;
     }
 
-    async getWorkspaceChats({ workspaceId, userId }: GetWorkspaceChatsParams): Promise<any> {
+    async getWorkspaceChats({ workspaceId, userId }: GetWorkspaceChatsParams): Promise<GetWorkspaceChatsRet> {
         try {
             // make sure that the user is authorized to recieve the workspace info
             const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
@@ -46,28 +54,31 @@ class Workmate {
                 throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
             }
 
-
             // fetch chats from the database.
             const chatsRepo = new ChatRepository(await this.#db.getConnection())
 
-            const chats = await chatsRepo.findByWkspcId({workspace_id: workspaceId})
+            const chats = await chatsRepo.findByWkspcId({ workspace_id: workspaceId })
 
-            if (chats === null) {
-                throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
+            return {
+                success: true,
+                message: `chats for workspace with id: ${workspaceId} retrieved successfully`,
+                data: {
+                    workspace: {
+                        id: workspaceId,
+                    },
+                    chats: chats,
+                }
             }
 
-
         } catch (err) {
-            await this.#db.transactionRollback()
             if (!(err instanceof WorkmateError)) {
-
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to get workspace members", StatusCodes.INTERNAL_SERVER_ERROR);
             }
             throw err;
         }
-
     }
+
     async getWorkspaceMembers({ workspaceId, userId }: GetWorkspaceMembersParams): Promise<GetWorkspaceMembersRet> {
         try {
             // make sure that the user is authorized to recieve the workspace info
@@ -129,9 +140,7 @@ class Workmate {
             }
 
         } catch (err) {
-            await this.#db.transactionRollback()
             if (!(err instanceof WorkmateError)) {
-
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to get workspace members", StatusCodes.INTERNAL_SERVER_ERROR);
             }
@@ -146,7 +155,6 @@ class Workmate {
 
             const wkspc = await wkspcRepo.findById(workspaceId)
             if (wkspc === null) {
-                await this.#db.transactionRollback()
                 throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
             }
 
@@ -171,7 +179,6 @@ class Workmate {
             }
 
         } catch (err) {
-            await this.#db.transactionRollback()
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to find workspace", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -187,7 +194,6 @@ class Workmate {
             let wkspcs = await wkspcRepo.findUserWorkspaces(userId)
 
             if (wkspcs === null) {
-                await this.#db.transactionRollback()
                 throw new WorkmateError("INTERNAL_ERROR", `something wrong when getting user workspaces`, StatusCodes.INTERNAL_SERVER_ERROR)
             }
 
@@ -202,8 +208,6 @@ class Workmate {
             }
 
         } catch (err) {
-            await this.#db.transactionRollback()
-
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to get user workspaces", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -211,11 +215,167 @@ class Workmate {
             throw err;
         }
     }
+    async createMessage({ chat, userId, msg }: CreateMessageParams): Promise<CreateMessageRet> {
+        try {
+
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(chat.workspace_id)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            // make sure that the user is authorized to create the chat
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            const mbr = await mbrsRepo.find({
+                user_id: userId,
+                workspace_id: chat.workspace_id,
+            })
+            if (mbr === null) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED)
+            }
+
+            // create the message now and add the message recipient (one-one or group(more than one recipient) to the message_receipent table;
+            await this.#db.startTransaction()
+
+            const msgRepo = new MessageRepository(await this.#db.getConnection())
+            const { message_id: msgId } = await msgRepo.add({
+                sender_id: userId,
+                chat_id: chat.id,
+                type: msg.type,
+                text: msg.text,
+                image: msg.image,
+                audio: msg.audio,
+            })
+
+            // get all the members of the chat
+            const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection());
+            const chatMembers = await chatMembersRepo.findByChatId({
+                chat_id: chat.id,
+            })
+
+
+            const msgRecptRepo = new MessageRecipientRepository(await this.#db.getConnection())
+            Promise.all(chatMembers.map(async (mbr) => {
+                if (mbr.user_id === userId) // sender can not be the receiver
+                    return;
+
+                await msgRecptRepo.add({
+                    message_id: msgId,
+                    user_id: mbr.user_id,// all the members of chat other than sender will be the receivers
+                })
+            }))
+
+            const insertedMessage = await msgRepo.findById({ message_id: msgId });
+
+            if (insertedMessage === null) {
+                // should not happen as the chat was just created
+                await this.#db.transactionRollback();
+                throw new WorkmateError('DATA_PERSISTENCE_ERROR', `message was not inserted into db with id ${msgId}`, StatusCodes.INTERNAL_SERVER_ERROR)
+            }
+
+            await this.#db.transactionCommit()
+
+            return {
+                success: true,
+                message: "Message sent successfully",
+                data: {
+                    message: insertedMessage,
+                    workspace: wkspc,
+                    chat: {
+                        ...chat,
+                        last_message_at: null,
+                    }
+                },
+            };
+
+        } catch (err) {
+            await this.#db.transactionRollback()
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", "failed to create workspace", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
+    async createChat({ chat, userId }: CreateChatParams): Promise<CreateChatRet> {
+        try {
+
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(chat.workspace_id)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            // make sure that the user is authorized to create the chat
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            const mbr = await mbrsRepo.find({
+                user_id: userId,
+                workspace_id: chat.workspace_id,
+            })
+            if (mbr === null) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED)
+            }
+
+            // create the chat now and add user as a chat_member of this chat in the db
+            await this.#db.startTransaction()
+
+            const chatRepo = new ChatRepository(await this.#db.getConnection())
+            const { id: chatId } = await chatRepo.add({
+                name: chat.name,
+                workspace_id: chat.workspace_id,
+                type: chat.type,
+            })
+
+            const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
+            await chatMembersRepo.add({
+                user_id: userId,
+                chat_id: chatId,
+                role: 'admin', // user creating the chat should be "admin"
+            });
+
+            const insertedChat = await chatRepo.find({ id: chatId });
+
+            if (insertedChat === null) {
+                // should not happen as the chat was just created
+                await this.#db.transactionRollback();
+                throw new WorkmateError('DATA_PERSISTENCE_ERROR', `chat was not inserted into db with id ${chatId}`, StatusCodes.INTERNAL_SERVER_ERROR)
+            }
+
+            await this.#db.transactionCommit()
+
+            return {
+                success: true,
+                message: "chat created successfully",
+                data: {
+                    chat: insertedChat,
+                    workspace: {
+                        id: wkspc.id,
+                        name: wkspc.name,
+                    }
+                },
+            }
+
+        } catch (err) {
+            await this.#db.transactionRollback()
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", "failed to create workspace", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
     // create workspaces?
     // patch ----?
     async createWorkspace({ name, creatorId, inviteLink }: CreateWorkspaceParams): Promise<CreateWorkspaceRet> {
         try {
-            await this.#db.startTransaction()
 
             // create the workspace
             const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection());
@@ -227,7 +387,6 @@ class Workmate {
             });
 
             if (wkspc !== null) {
-                await this.#db.transactionRollback()
                 throw new WorkmateError("USER_ERROR", `workspace with name: ${name} is already present, please choose different name`, StatusCodes.BAD_REQUEST)
             }
 
@@ -235,9 +394,10 @@ class Workmate {
             wkspc = await wkspcRepo.findByInviteLink(inviteLink)
 
             if (wkspc !== null) {
-                await this.#db.transactionRollback()
                 throw new WorkmateError("USER_ERROR", `invite link: {${inviteLink}} is already used by another workspace, please generate a different inviteLink`, StatusCodes.BAD_REQUEST)
             }
+
+            await this.#db.startTransaction()
 
             await wkspcRepo.createWorkspace(name, creatorId, inviteLink);
 
@@ -284,12 +444,8 @@ class Workmate {
         try {
             const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
 
-            await this.#db.startTransaction()
-
             const wkspc = await wkspcRepo.findByInviteLink(inviteLink)
             if (wkspc === null) {
-                await this.#db.transactionRollback()
-
                 throw new WorkmateError("USER_ERROR", "workspace not found, make sure your invite link is valid", StatusCodes.BAD_REQUEST)
             }
 
@@ -301,19 +457,15 @@ class Workmate {
             })
 
             if (mbr !== null) {
-                await this.#db.transactionRollback()
-
-                logger.info("here")
                 throw new WorkmateError("USER_ERROR", "user is already a member of this workspace", StatusCodes.BAD_REQUEST)
             }
+
 
             await mbrsRepo.add({
                 user_id: userId,
                 workspace_id: wkspc.id,
                 role: "member",
             })
-
-            await this.#db.transactionCommit()
 
             return {
                 success: true,
@@ -324,8 +476,6 @@ class Workmate {
             }
 
         } catch (err) {
-            await this.#db.transactionRollback()
-
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to join workspace", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -356,8 +506,6 @@ class Workmate {
             }
 
         } catch (err) {
-            await this.#db.transactionRollback()
-
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to join workspace", StatusCodes.INTERNAL_SERVER_ERROR);

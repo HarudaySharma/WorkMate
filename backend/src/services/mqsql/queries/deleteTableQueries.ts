@@ -28,3 +28,15 @@ export const deleteChatMembersTable = () => {
         DROP TABLE IF EXISTS chat_members;
     `
 }
+
+export const deleteMessagesTable = () => {
+    return `
+        DROP TABLE IF EXISTS messages;
+    `
+}
+
+export const deleteMessageRecipientsTable = () => {
+    return `
+        DROP TABLE IF EXISTS message_recipients;
+    `
+}

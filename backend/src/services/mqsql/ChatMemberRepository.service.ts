@@ -41,7 +41,7 @@ class ChatMemberRepository {
             ])
 
             if (!Array.isArray(rows)) {
-                return null;
+                throw new Error("unexpected database response when selecting chats from database")
             }
 
             return rows as ChatMember[];
@@ -59,7 +59,7 @@ class ChatMemberRepository {
             ])
 
             if (!Array.isArray(rows)) {
-                return null;
+                throw new Error("unexpected database response when selecting chats from database")
             }
 
             return rows as ChatMember[];

@@ -1,4 +1,4 @@
-import { Connection, ResultSetHeader } from "mysql2/promise";
+import { Connection, QueryResult, ResultSetHeader } from "mysql2/promise";
 import { Chat } from "../../database_schema.js";
 import logger from "../../logger.js";
 import { ADD_CHAT, DELETE_CHAT, FIND_CHAT, FIND_CHATS_BY_WORKSPACE_ID } from "./queries/chatQueries.js";
@@ -10,22 +10,25 @@ class ChatRepository {
         this.#database = db
     }
 
-    async add(chat: Chat) {
+    async add(chat: Omit<Chat, "id" | "last_message_at">): Promise<Pick<Chat, "id">> {
         try {
-            const [rows] = await this.#database.execute(ADD_CHAT, [
+            const [result] = await this.#database.execute(ADD_CHAT, [
                 chat.name,
                 chat.type,
                 chat.workspace_id,
             ])
 
-            const header = rows as ResultSetHeader
-            if (header.affectedRows !== 1) {
-                throw new Error("failed to insert chat into db")
+            // FIX: the ADD_CHAT query (MySQL doesn't support RETURNING keyword)
+            const header = result as ResultSetHeader
+
+            const insertedId = header.insertId
+            if (!insertedId) {
+                throw new Error("Failed to retrieve message_id after insertion.");
             }
 
             logger.info("operation successfull (added chat to db)")
 
-            return;
+            return { id: insertedId };
 
         } catch (err) {
             logger.error(err)
@@ -41,7 +44,7 @@ class ChatRepository {
             ])
 
             if (!Array.isArray(rows)) {
-                return null;
+                throw new Error("unexpected database response when selecting chats from database")
             }
 
             return rows as Chat[];
@@ -59,7 +62,7 @@ class ChatRepository {
             ])
 
             if (!Array.isArray(rows)) {
-                return null;
+                throw new Error("unexpected database response when selecting chats from database")
             }
             if (rows.length == 0) {
                 return null;

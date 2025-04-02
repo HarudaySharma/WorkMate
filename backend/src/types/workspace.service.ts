@@ -1,6 +1,6 @@
-import { WorkspaceMember, User, WorkSpace } from "../database_schema";
+import { WorkspaceMember, User, WorkSpace, Chat, Message } from "../database_schema";
 
-type ERROR_TYPE = "USER_ERROR" | "INTERNAL_ERROR" | "DATA_INCONSISTENCY_ERROR";
+type ERROR_TYPE = "USER_ERROR" | "INTERNAL_ERROR" | "DATA_INCONSISTENCY_ERROR" | "DATA_PERSISTENCE_ERROR";
 
 export class WorkmateError {
     type: ERROR_TYPE;
@@ -25,6 +25,17 @@ export class WorkmateReturnObj {
         this.message = message;
     }
 
+}
+
+export interface CreateChatParams {
+    chat: Omit<Chat, "last_message_at" | "id">;
+    userId: number;
+}
+
+export interface CreateMessageParams {
+    chat: Omit<Chat, "last_message_at">;
+    msg: Omit<Message, "created_at" | "is_deleted">;
+    userId: number; // will be the sender id
 }
 
 // params
@@ -89,11 +100,33 @@ export interface CreateWorkspaceRet extends WorkmateReturnObj {
     }
 }
 
+export interface CreateChatRet extends WorkmateReturnObj {
+    data: {
+        chat: Chat;
+        workspace: Pick<WorkSpace, "name" | "id">;
+    }
+}
+
+export interface CreateMessageRet extends WorkmateReturnObj {
+    data: {
+        message: Omit<Message, "is_deleted">;
+        chat: Chat,
+        workspace: Pick<WorkSpace, "name" | "id">;
+    }
+}
+
 export interface DeleteWorkspaceRet extends WorkmateReturnObj {
 }
 
 export interface GetWorkspaceMembersRet extends WorkmateReturnObj {
     data: {
-        members: (Pick<WorkspaceMember, "role"> & Pick<User, "username"| "name"| "email"| "profile_picture">) []
+        members: (Pick<WorkspaceMember, "role"> & Pick<User, "username" | "name" | "email" | "profile_picture">)[]
+    }
+}
+
+export interface GetWorkspaceChatsRet extends WorkmateReturnObj {
+    data: {
+        workspace: Pick<WorkSpace, "id">;
+        chats: Chat[];
     }
 }

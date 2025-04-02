@@ -1,10 +1,10 @@
 import mysql, { Connection } from "mysql2/promise"
 import logger from "../../logger.js"
-import { createWorkspaceMembersTableQ, createUsersTableQ, createWorkspacesTableQ, createChatsTableQ, createChatMembersTableQ } from "./queries/createTableQueries.js";
-import { deleteWorkspaceMembersTable, deleteUserTable, deleteWorkspaceTable, deleteChatMembersTable, deleteChatsTable } from "./queries/deleteTableQueries.js";
+import { createWorkspaceMembersTableQ, createUsersTableQ, createWorkspacesTableQ, createChatsTableQ, createChatMembersTableQ, createMessagesTableQ, createMessageRecipientsTableQ } from "./queries/createTableQueries.js";
+import { deleteWorkspaceMembersTable, deleteUserTable, deleteWorkspaceTable, deleteChatMembersTable, deleteChatsTable, deleteMessagesTable, deleteMessageRecipientsTable } from "./queries/deleteTableQueries.js";
 import env from "../../zod.js";
 
-type Table = "users" | "workspaces" | "chats" | "messages" | "chat_members" | "workspace_members"
+type Table = "users" | "workspaces" | "chats" | "messages" | "chat_members" | "workspace_members" | "message_recipients"
 
 export class Database {
     #database: Connection | null = null;
@@ -18,8 +18,10 @@ export class Database {
     }
 
     async initializeDatabase() {
+        // await this.deleteTable("message_recipients")
         // await this.deleteTable("chat_members")
         // await this.deleteTable("workspace_members")
+        // await this.deleteTable("messages")
         // await this.deleteTable("chats")
         // await this.deleteTable("workspaces")
         // await this.deleteTable("users")
@@ -27,8 +29,10 @@ export class Database {
         await this.createTable("users");
         await this.createTable("workspaces");
         await this.createTable("chats");
+        await this.createTable("messages");
         await this.createTable("workspace_members");
         await this.createTable("chat_members");
+        await this.createTable("message_recipients");
         logger.info("All required tables are initialized");
     }
 
@@ -129,6 +133,10 @@ export class Database {
                 query = createChatMembersTableQ()
                 break
             case "messages":
+                query = createMessagesTableQ()
+                break
+            case "message_recipients":
+                query = createMessageRecipientsTableQ()
                 break
         }
 
@@ -165,7 +173,11 @@ export class Database {
                 query = deleteChatMembersTable()
                 break;
             case "messages":
-                break
+                query = deleteMessagesTable()
+                break;
+            case "message_recipients":
+                query = deleteMessageRecipientsTable()
+                break;
         }
 
 

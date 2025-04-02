@@ -10,6 +10,7 @@ import logger from "./logger.js";
 import authRoutes from "./routes/auth"
 import userRoutes from "./routes/user"
 import workSpaceRoutes from "./routes/workspace"
+import chatRoutes from "./routes/chat"
 
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
 
@@ -36,6 +37,7 @@ app.use(cookieParser())
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/workspace', workSpaceRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use("*", (_, __, next) => {
     next(new Errorr("Not found", 404))

@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { JWTPayload } from ".";
+import { User } from "../database_schema";
 
 declare module "express" {
     export interface Request {

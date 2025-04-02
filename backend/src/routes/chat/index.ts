@@ -1,0 +1,14 @@
+import { Router } from "express";
+
+import verifyToken from "../../middlewares/verifyToken.middleware.js";
+import { createChat, getWorkspaceChats } from "../../controllers/chats/index.js";
+
+const router = Router();
+
+// we need to verify whether user is logged in or not, so that we can extract id from itspayload
+router.get("/:workspaceId/all", verifyToken, getWorkspaceChats);
+
+router.put("/:workspaceId", verifyToken, createChat)
+
+export default router;
+
