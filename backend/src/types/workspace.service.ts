@@ -74,6 +74,12 @@ export interface GetWorkspaceChatsParams {
     workspaceId: number;
 }
 
+export interface GetChatMessagesParams {
+    userId: number;
+    workspaceId: number;
+    chatId: number,
+}
+
 
 // returns
 export interface JoinWorkspaceRet extends WorkmateReturnObj {
@@ -128,5 +134,13 @@ export interface GetWorkspaceChatsRet extends WorkmateReturnObj {
     data: {
         workspace: Pick<WorkSpace, "id">;
         chats: Chat[];
+    }
+}
+
+export interface GetChatMessagesRet extends WorkmateReturnObj {
+    data: {
+        workspace: Pick<WorkSpace, "id">;
+        chat: Pick<Chat, "id">;// | "name" | "last_message_at">;
+        messages: Message[];
     }
 }

@@ -24,6 +24,8 @@ import {
     CreateChatRet,
     CreateMessageRet,
     CreateMessageParams,
+    GetChatMessagesRet,
+    GetChatMessagesParams,
 } from "../../types/workspace.service.js";
 import UserRepository from "../mqsql/UserRepository.service";
 import ChatRepository from "../mqsql/ChatRepository.service";
@@ -41,9 +43,58 @@ class Workmate {
         this.#db = db;
     }
 
+    async getChatMessages({ workspaceId, userId, chatId }: GetChatMessagesParams): Promise<GetChatMessagesRet> {
+        try {
+            // make sure that the user is authorized to recieve the messages
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            // checking if the user is the member of workspace.
+            const mbr = await mbrsRepo.find({
+                workspace_id: workspaceId,
+                user_id: userId,
+            })
+            if (mbr === null) {
+                throw new WorkmateError('USER_ERROR', `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED);
+            }
+
+            // check if the user is member of chat
+            const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
+            const chatMbr = await chatMembersRepo.find({ chat_id: chatId, user_id: userId })
+            if (chatMbr === null) {
+                throw new WorkmateError('USER_ERROR', `user is not a member of chat`, StatusCodes.UNAUTHORIZED);
+            }
+
+            // retrieve all the messages of the chat
+            const msgRepo = new MessageRepository(await this.#db.getConnection())
+
+            const messages = await msgRepo.findByChatId({ chat_id: chatId })
+
+            return {
+                success: true,
+                message: `messages for workspace with id: ${workspaceId} and chat with id: ${chatId} retrieved successfully`,
+                data: {
+                    workspace: {
+                        id: workspaceId,
+                    },
+                    chat: {
+                        id: chatId,
+                    },
+                    messages: messages,
+                }
+            }
+
+        } catch (err) {
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", "failed to get workspace members", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
     async getWorkspaceChats({ workspaceId, userId }: GetWorkspaceChatsParams): Promise<GetWorkspaceChatsRet> {
         try {
-            // make sure that the user is authorized to recieve the workspace info
+            // make sure that the user is authorized to recieve the workspace chats
             const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
 
             // checking if the user is the member of workspace.
@@ -82,7 +133,7 @@ class Workmate {
 
     async getWorkspaceMembers({ workspaceId, userId }: GetWorkspaceMembersParams): Promise<GetWorkspaceMembersRet> {
         try {
-            // make sure that the user is authorized to recieve the workspace info
+            // make sure that the user is authorized to recieve the workspace members info
             const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
 
             // checking if the user is the member of workspace.
@@ -153,6 +204,7 @@ class Workmate {
     // will return all the workspaces of a user
     async getWorkspaceInfo({ workspaceId, userId }: GetWorkspaceInfoParams): Promise<GetWorkspaceRet> {
         try {
+            // make sure that the user is authorized to recieve the workspace info
             const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
 
             const wkspc = await wkspcRepo.findById(workspaceId)
