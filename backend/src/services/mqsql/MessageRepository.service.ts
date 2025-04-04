@@ -3,7 +3,6 @@ import { Connection, ResultSetHeader } from "mysql2/promise";
 import { Message } from "../../database_schema.js";
 import logger from "../../logger.js";
 import { ADD_MESSAGE, DELETE_MESSAGE, FIND_MESSAGES_BY_CHAT_ID, FIND_MESSAGES_BY_ID as FIND_MESSAGE_BY_MESSAGE_ID } from "./queries/messageQueries.js";
-import { warn } from "console";
 
 class MessageRepository {
     #database: Connection
@@ -17,7 +16,10 @@ class MessageRepository {
             const id = uuidv4();
             const [result] = await this.#database.execute(ADD_MESSAGE, [
                 id, message.sender_id, message.chat_id,
-                message.type, message.text, message.image, message.audio,
+                message.type,
+                message.text || null,
+                message.image_url || null,
+                message.audio_url || null,
             ])
 
             const header = result as ResultSetHeader

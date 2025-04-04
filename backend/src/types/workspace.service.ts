@@ -33,8 +33,8 @@ export interface CreateChatParams {
 }
 
 export interface CreateMessageParams {
-    chat: Omit<Chat, "last_message_at">;
-    msg: Omit<Message, "created_at" | "is_deleted">;
+    chat: Pick<Chat, "workspace_id" | "id">;
+    msg: Omit<Message, "created_at" | "is_deleted" | "message_id">;
     userId: number; // will be the sender id
 }
 
@@ -110,7 +110,7 @@ export interface CreateChatRet extends WorkmateReturnObj {
 export interface CreateMessageRet extends WorkmateReturnObj {
     data: {
         message: Omit<Message, "is_deleted">;
-        chat: Chat,
+        chat: Pick<Chat, "workspace_id" | "id">;
         workspace: Pick<WorkSpace, "name" | "id">;
     }
 }

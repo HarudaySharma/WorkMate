@@ -30,6 +30,7 @@ import ChatRepository from "../mqsql/ChatRepository.service";
 import ChatMemberRepository from "../mqsql/ChatMemberRepository.service";
 import MessageRepository from "../mqsql/MessageRepository.service";
 import MessageRecipientRepository from "../mqsql/MessageRecipientRepository.service";
+import { P } from "pino";
 
 
 class Workmate {
@@ -148,6 +149,7 @@ class Workmate {
         }
 
     }
+
     // will return all the workspaces of a user
     async getWorkspaceInfo({ workspaceId, userId }: GetWorkspaceInfoParams): Promise<GetWorkspaceRet> {
         try {
@@ -215,6 +217,7 @@ class Workmate {
             throw err;
         }
     }
+
     async createMessage({ chat, userId, msg }: CreateMessageParams): Promise<CreateMessageRet> {
         try {
 
@@ -245,15 +248,34 @@ class Workmate {
                 chat_id: chat.id,
                 type: msg.type,
                 text: msg.text,
-                image: msg.image,
-                audio: msg.audio,
+                image_url: msg.image_url,
+                audio_url: msg.audio_url,
             })
 
-            // get all the members of the chat
             const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection());
+
+            // NOTE:
+            // what if user trying to send the message is not a chat member ??
+            // right now if user if member of wkpsc then they can send messages to any group chats, so if the user is not a chat member -> make it a member.
+            const chatMember = await chatMembersRepo.find({
+                user_id: userId,
+                chat_id: chat.id,
+            })
+
+            if (!chatMember) {
+                await chatMembersRepo.add({
+                    user_id: userId,
+                    chat_id: chat.id,
+                    role: 'member',
+                })
+            }
+
+            // get all the members of the chat
             const chatMembers = await chatMembersRepo.findByChatId({
                 chat_id: chat.id,
             })
+
+            // logger.info({ chatMembers })
 
 
             const msgRecptRepo = new MessageRecipientRepository(await this.#db.getConnection())
@@ -279,13 +301,15 @@ class Workmate {
 
             return {
                 success: true,
-                message: "Message sent successfully",
+                message: "Message created successfully",
                 data: {
                     message: insertedMessage,
-                    workspace: wkspc,
+                    workspace: {
+                        id: wkspc.id,
+                        name: wkspc.name,
+                    },
                     chat: {
                         ...chat,
-                        last_message_at: null,
                     }
                 },
             };
@@ -295,7 +319,7 @@ class Workmate {
 
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
-                throw new WorkmateError("INTERNAL_ERROR", "failed to create workspace", StatusCodes.INTERNAL_SERVER_ERROR);
+                throw new WorkmateError("INTERNAL_ERROR", "failed to create message", StatusCodes.INTERNAL_SERVER_ERROR);
             }
             throw err;
         }

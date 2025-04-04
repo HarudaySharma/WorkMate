@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import verifyToken from "../../middlewares/verifyToken.middleware.js";
-import { createWorkspace, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
+import { createWorkspace, deleteWorkspace, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
 
 const router = Router();
 
@@ -11,7 +11,7 @@ router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
 router.get("/:workspaceId", verifyToken, getWorkspace);
 
 router.put("/", verifyToken, createWorkspace)
-router.delete("/:workspaceId", verifyToken, createWorkspace)
+router.delete("/:workspaceId", verifyToken, deleteWorkspace)
 router.patch("/:inviteLink/join", verifyToken, joinWorkspace)
 
 // INFO:

@@ -55,8 +55,8 @@ export type Message = {
 
     type: "text" | "image" | "audio",
     text: string | null,
-    image: string | null, // url to the image
-    audio: string | null, // url to the audio file
+    image_url: string | null, // url to the image
+    audio_url: string | null, // url to the audio file
     created_at: Date,
     is_deleted: boolean
     // optional:
