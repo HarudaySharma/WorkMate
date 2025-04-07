@@ -1,4 +1,4 @@
-import { WorkspaceMember, User, WorkSpace, Chat, Message } from "../database_schema";
+import { WorkspaceMember, User, WorkSpace, Chat, Message, ChatMember } from "../database_schema";
 
 type ERROR_TYPE = "USER_ERROR" | "INTERNAL_ERROR" | "DATA_INCONSISTENCY_ERROR" | "DATA_PERSISTENCE_ERROR";
 
@@ -80,6 +80,19 @@ export interface GetChatMessagesParams {
     chatId: number,
 }
 
+export interface JoinChatParams {
+    userId: number;
+    workspaceId: number;
+    chatId: number,
+    role: ChatMember["role"],
+}
+
+export interface GetChatMembersParams {
+    userId: number;
+    workspaceId: number;
+    chatId: number,
+}
+
 
 // returns
 export interface JoinWorkspaceRet extends WorkmateReturnObj {
@@ -144,3 +157,14 @@ export interface GetChatMessagesRet extends WorkmateReturnObj {
         messages: Message[];
     }
 }
+
+export interface JoinChatRet extends WorkmateReturnObj { }
+
+export interface ChatMemberReturn extends Pick<User, "name" | "username" | "email" | "profile_picture" | "id">, Pick<ChatMember, "role" | "joined_at">{ };
+export interface GetChatMembersRet extends WorkmateReturnObj {
+    data: {
+        members: ChatMemberReturn[];
+    }
+}
+
+

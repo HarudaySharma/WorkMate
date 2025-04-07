@@ -6,10 +6,10 @@ import db from "../../services/mqsql/mysql.service.js";
 import logger from "../../logger.js";
 import Workmate from "../../services/workmate/workmate.service.js";
 import { WorkmateError } from "../../types/workspace.service.js";
-import { Message } from "../../database_schema.js";
+import { ChatMember, Message } from "../../database_schema.js";
 
 export const createMessage = async (req: Request, res: Response, next: NextFunction) => {
-    logger.info("HIT: PUT /chat/:chatId/message")
+    logger.info("HIT: PUT /chat/:workspaceId/:chatId/message")
 
     if (!req.user) {
         next(new Errorr("no user found, cannot create a message", StatusCodes.UNAUTHORIZED));
@@ -64,7 +64,55 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
     }
 }
 
-export const getMessages = async (req: Request, res: Response, next: NextFunction) => {
+export const joinChat = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: PATCH /chat/:workspaceId/:chatId/")
+
+    if (!req.user) {
+        next(new Errorr("no user found, cannot join the chat", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { id: userId } = req.user;
+    if (userId === undefined) {
+        next(new Errorr("invalid user id, cannot join the chat", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { workspaceId, chatId } = req.params;
+    if (workspaceId === undefined || chatId === undefined) {
+        next(new Errorr("no Workspace Id provided or chat Id provided", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { role } = req.query as { role: ChatMember["role"] };
+
+    try {
+        const workmate = new Workmate(db)
+
+        const ret = await workmate.joinChat({
+            workspaceId: +workspaceId,
+            chatId: +chatId,
+            userId: userId,
+            role: role,
+        })
+
+        res.status(StatusCodes.OK).json(ret) // show user the workspace -> redirect them to the workspace
+    } catch (err) {
+        const er = err as WorkmateError;// err will always be of type WorkmateError
+        if (er.type === undefined) {
+            console.log(err)
+            next(new Errorr("internal server error"));
+            return
+        }
+
+        logger.error(er.error)
+        const statusCode = (er.type === "USER_ERROR" ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR);
+        next(new Errorr(er.message, er.httpStatusCode || statusCode))
+    }
+}
+
+
+export const getChatMessages = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: GET /chat/:workspaceId/:chatId/messages")
 
     if (!req.user) {
@@ -88,6 +136,50 @@ export const getMessages = async (req: Request, res: Response, next: NextFunctio
         const workmate = new Workmate(db)
 
         const ret = await workmate.getChatMessages({
+            userId: userId,
+            workspaceId: +workspaceId,
+            chatId: +chatId,
+        })
+
+        res.status(StatusCodes.OK).json(ret) // show user the workspace -> redirect them to the workspace
+    } catch (err) {
+        const er = err as WorkmateError;// err will always be of type WorkmateError
+        if (er.type === undefined) {
+            console.log(err)
+            next(new Errorr("internal server error"));
+            return
+        }
+
+        logger.error(er.error)
+        const statusCode = (er.type === "USER_ERROR" ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR);
+        next(new Errorr(er.message, er.httpStatusCode || statusCode))
+    }
+}
+
+export const getChatMembers = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: GET /chat/:workspaceId/:chatId/members")
+
+    if (!req.user) {
+        next(new Errorr("no user found, cannot get chat members", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { id: userId } = req.user;
+    if (userId === undefined) {
+        next(new Errorr("invalid user id, cannot get chat members", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { workspaceId, chatId } = req.params;
+    if (workspaceId === undefined || chatId === undefined) {
+        next(new Errorr("no Workspace Id provided or chat Id provided", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    try {
+        const workmate = new Workmate(db)
+
+        const ret = await workmate.getChatMembers({
             userId: userId,
             workspaceId: +workspaceId,
             chatId: +chatId,
