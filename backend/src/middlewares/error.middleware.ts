@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express"
 
 export class Errorr extends Error {
-    constructor(public msg: string, public statusCode?: number) {
+    constructor(public message: string, public statusCode?: number) {
         super()
     }
 
     public format() {
         return {
-            message: this.msg,
+            message: this.message,
             statusCode: this.statusCode,
         }
     }
@@ -16,6 +16,8 @@ export class Errorr extends Error {
 const errorHandler = (err: Errorr, __: Request, res: Response, _: NextFunction) => {
     res.status(err.statusCode || 500)
     res.json(err.format());
+
+    return err.format()
 }
 
 export default errorHandler;

@@ -33,7 +33,6 @@ export const verifyToken = (req: Request, _: Response, next: NextFunction) => {
 
 export const wsVerifyToken = (socket: Socket, next: (err?: ExtendedError) => void) => {
     const { access_token } = socket.handshake.auth;
-    logger.info("here")
     if (!access_token) {
         next(new Errorr("missing access_token", StatusCodes.UNAUTHORIZED))
         return
