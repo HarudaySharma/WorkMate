@@ -5,6 +5,7 @@ config()
 
 let envSchema = z.object({
     PORT: z.string().nonempty(),
+    WS_PORT: z.string().nonempty(),
     SALT_LEN: z.string().nonempty(),
     JWT_SECRET: z.string().nonempty(),
     MYSQL_HOST: z.string().nonempty(),

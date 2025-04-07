@@ -2,7 +2,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-
 import env from "./zod.js";
 import logger from "./logger.js";
 
@@ -15,6 +14,7 @@ import chatRoutes from "./routes/chat"
 import errorHandler, { Errorr } from "./middlewares/error.middleware.js";
 
 import db from "./services/mqsql/mysql.service.js";
+import startWSServer from "./ws-server.js";
 
 db.initializeDatabase()
 
@@ -56,6 +56,7 @@ app.listen(PORT, (err) => {
     logger.info(`server running on http://localhost:${PORT}`)
 })
 
+startWSServer()
 
 process.on("SIGINT", async () => {
     await db.close();

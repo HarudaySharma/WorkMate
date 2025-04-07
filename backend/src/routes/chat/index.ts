@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import verifyToken from "../../middlewares/verifyToken.middleware.js";
+import { verifyToken } from "../../middlewares/verifyToken.middleware.js";
 import { createChat, getWorkspaceChats } from "../../controllers/chats/index.js";
 import { createMessage, getChatMembers, getChatMessages, joinChat } from "../../controllers/messages/index.js";
 

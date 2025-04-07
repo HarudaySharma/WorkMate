@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import verifyToken from "../../middlewares/verifyToken.middleware.js";
+import { verifyToken } from "../../middlewares/verifyToken.middleware.js";
 import { createWorkspace, deleteWorkspace, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
 
 const router = Router();
