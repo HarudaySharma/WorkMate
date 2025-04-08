@@ -40,8 +40,6 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
                 workspace_id: +workspaceId,
             },
             msg: {
-                sender_id: userId,
-                chat_id: +chatId,
                 type: message.type,
                 text: message.text,
                 audio_url: message.audio_url,

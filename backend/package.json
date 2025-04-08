@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "npx tsc ./src/test/wsClient.ts -w & npx nodemon ./dist/test/wsClient.js",
+        "test": "npx tsc -w & npx nodemon ./dist/test/wsClient.js",
         "dev": "npx tsc -w & npx nodemon ./dist/server.js",
         "build": "npx tsc"
     },

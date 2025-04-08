@@ -16,8 +16,6 @@ export class Errorr extends Error {
 const errorHandler = (err: Errorr, __: Request, res: Response, _: NextFunction) => {
     res.status(err.statusCode || 500)
     res.json(err.format());
-
-    return err.format()
 }
 
 export default errorHandler;

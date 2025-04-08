@@ -1,4 +1,4 @@
-function generateRoomId (workspaceId: string, chatId: string) {
+function generateRoomId (workspaceId: number, chatId: number) {
     return `${workspaceId}#${chatId}`;
 }
 
