@@ -29,69 +29,76 @@ export class WorkmateReturnObj {
 
 export interface CreateChatParams {
     chat: Omit<Chat, "last_message_at" | "id">;
-    userId: number;
+    userId: User["id"];
 }
 
 export interface CreateMessageParams {
     chat: Pick<Chat, "workspace_id" | "id">;
     msg: Omit<Message, "created_at" | "is_deleted" | "message_id" | "sender_id" | "chat_id">;
-    userId: number; // will be the sender id
+    userId: User["id"];
 }
 
 
 // params
 export interface CreateWorkspaceParams {
-    name: string;
-    creatorId: number;
-    inviteLink: string;
+    name: WorkSpace["name"];
+    creatorId: WorkSpace["creator_id"];
+    inviteLink: WorkSpace["invite_link"];
 }
 
 export interface JoinWorkspaceParams {
-    userId: number;
-    inviteLink: string;
+    userId: User["id"];
+    inviteLink: WorkSpace["invite_link"];
 }
 
 export interface DeleteWorkspaceParams {
-    workspaceName: string;
-    userId: number;
+    workspaceName: WorkSpace["name"];
+    userId: User["id"];
 }
 
 export interface GetUserWorkspacesParams {
-    userId: number;
+    userId: User["id"];
 }
 
 export interface GetWorkspaceInfoParams {
-    userId: number;
-    workspaceId: number;
+    userId: User["id"];
+    workspaceId: WorkSpace["id"];
 }
 
 export interface GetWorkspaceMembersParams {
-    userId: number;
-    workspaceId: number;
+    userId: User["id"];
+    workspaceId: WorkSpace["id"];
 }
 
 export interface GetWorkspaceChatsParams {
-    userId: number;
-    workspaceId: number;
+    userId: User["id"];
+    workspaceId: WorkSpace["id"];
 }
 
 export interface GetChatMessagesParams {
-    userId: number;
-    workspaceId: number;
-    chatId: number,
+    userId: User["id"];
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
+}
+
+export interface DeleteChatMessageParams {
+    userId: User["id"];
+    workspace_id: WorkSpace["id"],
+    chatId: Chat["id"];
+    messageId: Message["message_id"],
 }
 
 export interface JoinChatParams {
-    userId: number;
-    workspaceId: number;
-    chatId: number,
+    userId: User["id"];
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
     role: ChatMember["role"],
 }
 
 export interface GetChatMembersParams {
-    userId: number;
-    workspaceId: number;
-    chatId: number,
+    userId: User["id"];
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
 }
 
 
@@ -161,7 +168,7 @@ export interface GetChatMessagesRet extends WorkmateReturnObj {
 
 export interface JoinChatRet extends WorkmateReturnObj { }
 
-export interface ChatMemberReturn extends Pick<User, "name" | "username" | "email" | "profile_picture" | "id">, Pick<ChatMember, "role" | "joined_at">{ };
+export interface ChatMemberReturn extends Pick<User, "name" | "username" | "email" | "profile_picture" | "id">, Pick<ChatMember, "role" | "joined_at"> { };
 export interface GetChatMembersRet extends WorkmateReturnObj {
     data: {
         members: ChatMemberReturn[];
@@ -172,17 +179,17 @@ export interface GetChatMembersRet extends WorkmateReturnObj {
 // SOCKETTTTTTTTTS
 
 export interface CreateMessageEventParams {
-    workspaceId: number,
-    chatId: number,
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
     message: Pick<Message, "type" | "text" | "image_url" | "audio_url">;
 }
 
 export interface JoinChatEventParams {
-    workspaceId: number,
-    chatId: number,
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
 }
 
 export interface LeaveChatEventParams {
-    workspaceId: number,
-    chatId: number,
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
 }
