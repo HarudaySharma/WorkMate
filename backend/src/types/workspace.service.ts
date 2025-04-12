@@ -27,6 +27,8 @@ export class WorkmateReturnObj {
 
 }
 
+// params
+
 export interface CreateChatParams {
     chat: Omit<Chat, "last_message_at" | "id">;
     userId: User["id"];
@@ -39,7 +41,6 @@ export interface CreateMessageParams {
 }
 
 
-// params
 export interface CreateWorkspaceParams {
     name: WorkSpace["name"];
     creatorId: WorkSpace["creator_id"];
@@ -83,8 +84,6 @@ export interface GetChatMessagesParams {
 
 export interface DeleteChatMessageParams {
     userId: User["id"];
-    workspace_id: WorkSpace["id"],
-    chatId: Chat["id"];
     messageId: Message["message_id"],
 }
 
@@ -162,7 +161,7 @@ export interface GetChatMessagesRet extends WorkmateReturnObj {
     data: {
         workspace: Pick<WorkSpace, "id">;
         chat: Pick<Chat, "id">;// | "name" | "last_message_at">;
-        messages: Message[];
+        messages: Omit<Message, "is_deleted">[];
     }
 }
 
@@ -174,6 +173,8 @@ export interface GetChatMembersRet extends WorkmateReturnObj {
         members: ChatMemberReturn[];
     }
 }
+
+export interface DeleteChatMessageRet extends WorkmateReturnObj { }
 
 
 // SOCKETTTTTTTTTS

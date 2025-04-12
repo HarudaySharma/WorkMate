@@ -31,13 +31,14 @@ import {
     GetChatMembersParams,
     GetChatMembersRet,
     ChatMemberReturn,
+    DeleteChatMessageParams,
+    DeleteChatMessageRet,
 } from "../../types/workspace.service.js";
 import UserRepository from "../mqsql/UserRepository.service";
 import ChatRepository from "../mqsql/ChatRepository.service";
 import ChatMemberRepository from "../mqsql/ChatMemberRepository.service";
 import MessageRepository from "../mqsql/MessageRepository.service";
 import MessageRecipientRepository from "../mqsql/MessageRecipientRepository.service";
-
 
 class Workmate {
     // how should it perform the task?
@@ -690,6 +691,8 @@ class Workmate {
 
             const messages = await msgRepo.findByChatId({ chat_id: chatId })
 
+            const filteredMsgs = messages.filter(msg => msg.is_deleted === 0)
+
             return {
                 success: true,
                 message: `messages for workspace with id: ${workspaceId} and chat with id: ${chatId} retrieved successfully`,
@@ -700,8 +703,39 @@ class Workmate {
                     chat: {
                         id: chatId,
                     },
-                    messages: messages,
+                    messages: filteredMsgs,
                 }
+            }
+
+        } catch (err) {
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", "failed to get workspace members", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
+    async deleteMessage({ userId, messageId }: DeleteChatMessageParams): Promise<DeleteChatMessageRet> {
+        try {
+            const msgRepo = new MessageRepository(await this.#db.getConnection())
+
+            // checks if msg is in the db
+            const msg = await msgRepo.findById({ message_id: messageId })
+            if(msg === null) {
+                throw new WorkmateError("USER_ERROR", `message with id: ${messageId} not found`, StatusCodes.BAD_REQUEST)
+            }
+
+            // checks if the user deleting the msg is the sender.
+            if(msg.sender_id !== userId) {
+                throw new WorkmateError("USER_ERROR", `failed to delete message`, StatusCodes.UNAUTHORIZED)
+            }
+
+            await msgRepo.delete({ message_id: messageId })
+
+            return {
+                success: true,
+                message: `message with id: ${messageId} successfully deleted`,
             }
 
         } catch (err) {

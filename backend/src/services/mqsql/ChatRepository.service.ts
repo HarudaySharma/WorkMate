@@ -18,7 +18,6 @@ class ChatRepository {
                 chat.workspace_id,
             ])
 
-            // FIX: the ADD_CHAT query (MySQL doesn't support RETURNING keyword)
             const header = result as ResultSetHeader
 
             const insertedId = header.insertId

@@ -58,7 +58,7 @@ export type Message = {
     image_url: string | null, // url to the image
     audio_url: string | null, // url to the audio file
     created_at: Date,
-    is_deleted: boolean
+    is_deleted: 0 | 1;
     // optional:
     // isUpdated: boolean
 }

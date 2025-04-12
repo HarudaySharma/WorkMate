@@ -27,7 +27,6 @@ class MessageRepository {
                 throw new Error(`Failed to add message: message_id=${id}`)
             }
 
-            // FIX: the ADD_MESSAGE query (MySQL doesn't support RETURNING keyword)
             logger.info(`operation successfull (added message: message_id=${id} to db)`)
 
             return { message_id: id };
