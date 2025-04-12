@@ -32,7 +32,7 @@ export const createWorkspacesTableQ = () => {
 
             CONSTRAINT fk_workspaces_creator_id FOREIGN KEY (creator_id)
                 REFERENCES users(id)
-                -- ON DELETE CASCADE -- will use it later
+                ON DELETE CASCADE
         );
     `;
 }
@@ -46,12 +46,12 @@ export const createWorkspaceMembersTableQ = () => {
             role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
 
             CONSTRAINT fk_wkspcmbr_user_id FOREIGN KEY (user_id)
-                REFERENCES users(id),
-                -- ON DELETE CASCADE -- will use it later
+                REFERENCES users(id)
+                ON DELETE CASCADE,
 
             CONSTRAINT fk_wkspcmbr_workspace_id FOREIGN KEY (workspace_id)
-                REFERENCES workspaces(id),
-                -- ON DELETE CASCADE -- will use it later
+                REFERENCES workspaces(id)
+                ON DELETE CASCADE,
 
              UNIQUE KEY uq_user_workspace (user_id, workspace_id)
         );
@@ -70,7 +70,7 @@ export const createChatsTableQ = () => {
 
             CONSTRAINT fk_chats_workspace_id FOREIGN KEY (workspace_id)
                 REFERENCES workspaces(id)
-                -- ON DELETE CASCADE -- will use it later
+                ON DELETE CASCADE
         );
     `;
 }
@@ -86,12 +86,12 @@ export const createChatMembersTableQ = () => {
             joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
             CONSTRAINT fk_chatsmbr_user_id FOREIGN KEY (user_id)
-                REFERENCES users(id),
-                -- ON DELETE CASCADE -- will use it later
+                REFERENCES users(id)
+                ON DELETE CASCADE,
 
             CONSTRAINT fk_chatsmbr_chat_id FOREIGN KEY (chat_id)
-                REFERENCES chats(id),
-                -- ON DELETE CASCADE -- will use it later
+                REFERENCES chats(id)
+                ON DELETE CASCADE,
 
              UNIQUE KEY uq_user_chat (user_id, chat_id)
         );
@@ -116,11 +116,11 @@ export const createMessagesTableQ = () => {
             is_deleted TINYINT(1) DEFAULT 0, -- Boolean field with default value (0 = false)
 
             CONSTRAINT fk_messages_sender_id FOREIGN KEY (sender_id)
-                REFERENCES users(id),
-                -- ON DELETE CASCADE -- will use it later
+                REFERENCES users(id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_messages_chat_id FOREIGN KEY (chat_id)
                 REFERENCES chats(id)
-                -- ON DELETE CASCADE -- will use it later
+                ON DELETE CASCADE
         );
     `;
 }
@@ -134,8 +134,12 @@ export const createMessageRecipientsTableQ = () => {
          read_at TIMESTAMP NULL DEFAULT NULL, -- When the user read the message
 
          PRIMARY KEY (message_id, user_id),
-         FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE,
-         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+         CONSTRAINT fk_msg_recpt_message_id FOREIGN KEY (message_id)
+            REFERENCES messages(message_id)
+            ON DELETE CASCADE,
+         CONSTRAINT fk_msg_recpt_user_id FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE
      );
     `;
 }
