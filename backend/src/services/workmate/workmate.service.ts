@@ -33,6 +33,10 @@ import {
     ChatMemberReturn,
     DeleteChatMessageParams,
     DeleteChatMessageRet,
+    DeleteChatParams,
+    DeleteChatRet,
+    LeaveChatRet,
+    LeaveChatParams,
 } from "../../types/workspace.service.js";
 import UserRepository from "../mqsql/UserRepository.service";
 import ChatRepository from "../mqsql/ChatRepository.service";
@@ -269,6 +273,103 @@ class Workmate {
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to create workspace", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
+    async leaveChat({ chat, userId }: LeaveChatParams): Promise<LeaveChatRet> {
+        try {
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(chat.workspace_id)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            // make sure that the user is authorized to create the chat
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            const mbr = await mbrsRepo.find({
+                user_id: userId,
+                workspace_id: chat.workspace_id,
+            })
+            if (mbr === null) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED)
+            }
+
+            const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
+            await chatMembersRepo.delete({
+                user_id: userId,
+                chat_id: chat.id
+            })
+
+            return {
+                success: true,
+                message: `user leaved the chat successfully`
+            }
+
+        } catch (err) {
+            await this.#db.transactionRollback()
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", `failed to leave chat {id: ${chat.id}}`, StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
+    async deleteChat({ chat, userId }: DeleteChatParams): Promise<DeleteChatRet> {
+        try {
+
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(chat.workspace_id)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            // make sure that the user is authorized to create the chat
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            const mbr = await mbrsRepo.find({
+                user_id: userId,
+                workspace_id: chat.workspace_id,
+            })
+            if (mbr === null) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of workspace, and the workspace is not public`, StatusCodes.UNAUTHORIZED)
+            }
+
+            // check if the user has permission to delete the chat
+            // role: 'admin'
+            const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
+            const chatMbr = await chatMembersRepo.find({
+                user_id: userId,
+                chat_id: chat.id
+            })
+            if (chatMbr === null) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of chat`, StatusCodes.UNAUTHORIZED)
+            }
+            if (chatMbr.role !== 'admin') {
+                throw new WorkmateError("USER_ERROR", `failed to delete (only admins can delete the chat)`, StatusCodes.UNAUTHORIZED)
+            }
+
+            // delete the chat
+            const chatRepo = new ChatRepository(await this.#db.getConnection())
+            await chatRepo.delete({ id: chat.id })
+
+            return {
+                success: true,
+                message: `chat deleted successfully`
+            }
+
+        } catch (err) {
+            await this.#db.transactionRollback()
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", `failed to delete chat {id: ${chat.id}}`, StatusCodes.INTERNAL_SERVER_ERROR);
             }
             throw err;
         }
@@ -722,12 +823,12 @@ class Workmate {
 
             // checks if msg is in the db
             const msg = await msgRepo.findById({ message_id: messageId })
-            if(msg === null) {
+            if (msg === null) {
                 throw new WorkmateError("USER_ERROR", `message with id: ${messageId} not found`, StatusCodes.BAD_REQUEST)
             }
 
             // checks if the user deleting the msg is the sender.
-            if(msg.sender_id !== userId) {
+            if (msg.sender_id !== userId) {
                 throw new WorkmateError("USER_ERROR", `failed to delete message`, StatusCodes.UNAUTHORIZED)
             }
 

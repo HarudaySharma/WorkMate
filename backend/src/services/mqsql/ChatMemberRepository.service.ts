@@ -92,7 +92,6 @@ class ChatMemberRepository {
         }
     }
 
-
     async delete(chatMember: Pick<ChatMember, "user_id" | "chat_id">) {
 
         logger.info("deleting chat member...")
