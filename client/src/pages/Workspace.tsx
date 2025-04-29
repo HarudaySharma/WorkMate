@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import logo from '../assets/logoWMnew-Photoroom.png'
 import { Bolt, CalendarCheck2, Home, Info, LogOut, MessageCircleMore, Plus, Search, SunMoon, User, UserRoundPen } from 'lucide-react'
+import Chat from '../components/Workspace/Chat';
 
 const Workspace = () => {
 
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isWorkspaceOpen, setIsWorkpaceOpen] = useState(false);
+    const [activeTab, setIsActiveTab] = useState('home');
 
     // Mock workspace data - replace with actual data later
   const workspaces = [
@@ -79,23 +81,36 @@ const Workspace = () => {
             {/* Navigation Items */}
             <div className='flex flex-col space-y-6 mt-12'>
 
-                <button className="w-10 h-10 rounded-lg flex items-center justify-center 
-                text-gray-600 hover:bg-gray-100 transition-colors">
+                <button
+                onClick={() => setIsActiveTab('home')}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center 
+                text-gray-600 hover:bg-gray-100 transition-colors
+                ${activeTab === 'home' ? 'bg-gray-100' : ''}`}
+                >
                     <Home size={24}/>
                 </button>
 
-                <button className="w-10 h-10 rounded-lg flex items-center justify-center 
-                text-gray-600 hover:bg-gray-100 transition-colors">
+                <button 
+                onClick={() => setIsActiveTab('chat')}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center 
+                text-gray-600 hover:bg-gray-100 transition-colors
+                ${activeTab === 'chat' ? 'bg-gray-100' : ''}`}>
                     <MessageCircleMore size={24}/>
                 </button>
 
-                <button className="w-10 h-10 rounded-lg flex items-center justify-center 
-                text-gray-600 hover:bg-gray-100 transition-colors">
+                <button
+                onClick={() => setIsActiveTab('calendar')}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center 
+                text-gray-600 hover:bg-gray-100 transition-colors
+                ${activeTab === 'calendar' ? 'bg-gray-100' : ''}`}>
                     <CalendarCheck2 size={24}/>
                 </button>
 
-                <button className="w-10 h-10 rounded-lg flex items-center justify-center 
-                text-gray-600 hover:bg-gray-100 transition-colors">
+                <button
+                onClick={() => setIsActiveTab('info')}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center 
+                text-gray-600 hover:bg-gray-100 transition-colors
+                ${activeTab === 'info' ? 'bg-gray-100' : ''}`}>
                     <Info size={24}/>
                 </button>
 
@@ -170,8 +185,17 @@ const Workspace = () => {
             </div>
 
             {/* Main Content Arear */}
-            <div className='p-2'>
-                <div className='bg-white rounded-lg h-[calc(100vh-4.5rem)] w-full border-1 border-gray-300 drop-shadow-lg'></div>
+            <div className='px-2'>
+                <div className='bg-white rounded-lg h-[calc(100vh-4.5rem)] w-full border-1
+                border-gray-300 drop-shadow-lg'>
+                    {activeTab === 'chat' ? (
+                        <Chat/>
+                    ) : (
+                        <div className='flex items-center justify-center h-full text-gray-500'>
+                            Select Tab to view content.
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     </div>
