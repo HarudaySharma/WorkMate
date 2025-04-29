@@ -5,6 +5,7 @@ import Overview from '../components/home/Overview';
 import Collaborate from '../components/home/Collaborate';
 import Productivity from '../components/home/Productivity';
 import Footer from '../components/home/Footer';
+import Workspace from './Workspace';
 
 
 const Home = () => {
@@ -36,6 +37,8 @@ const Home = () => {
             {/*Footer Section*/}
 
             <Footer />
+
+            <Workspace/>
 
         </div>
     )
