@@ -4,6 +4,7 @@ export interface ErrorFormat {
 }
 
 export interface User {
+    id: number
     name?: string,
     username: string,
     email: string,
@@ -30,4 +31,4 @@ export type WorkSpace = {
 }
 
 export type AuthProvider = "google" | "github" | "facebook";
-    
+

@@ -15,6 +15,7 @@ export const userInfo = async (req: Request, res: Response, next: NextFunction) 
     }
 
     res.status(StatusCodes.OK).json({
+        id: user.id,
         profilePicture: user.profile_picture,
         name: user.name,
         username: user.username,

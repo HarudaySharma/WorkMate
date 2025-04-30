@@ -1,28 +1,12 @@
-import { FiLogOut } from 'react-icons/fi'
-import { MdDelete } from 'react-icons/md'
 import useAuth from '../hooks/useAuth'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import env from '../zod';
 import { LogOut, SunMoon, UserRoundPen } from 'lucide-react';
-import { User } from '../types';
 
-const dummyUser: User = {
-    name: "dev",
-    email: "dev@mail.io",
-    username: "dev",
-    profilePicture: "https://avatars.githubusercontent.com/u/136163887?v=4",
-}
 
 const UserProfile = () => {
     const { user, setUser } = useAuth();
     const [isUserOpen, setIsUserOpen] = useState(false);
-
-    // only for dev
-    useEffect(() => {
-        if(!user) {
-            setUser(dummyUser)
-        }
-    },[user, dummyUser])
 
     const toggleUser = () => {
         setIsUserOpen(!isUserOpen);
@@ -110,8 +94,8 @@ const UserProfile = () => {
                                 className="w-10 h-10 rounded-full"
                             />
                             <div>
-                                <p className="text-sm font-semibold dark:text-gray-400 mx-auto text-center w-2/3 overflow-scroll">{user.username}</p>
-                                <p className="text-xs text-gray-500 mx-auto w-2/3 overflow-scroll dark:text-gray-400">{user.email}</p>
+                                <p className="text-sm font-semibold dark:text-gray-400 mx-auto text-center w-full overflow-hidden">{user.username}</p>
+                                <p className="text-xs text-gray-500 mx-auto w-full overflow-hidden dark:text-gray-400">{user.email}</p>
                             </div>
                         </div>
                         {/*<div className="flex justify-between items-center mt-3 mb-4">

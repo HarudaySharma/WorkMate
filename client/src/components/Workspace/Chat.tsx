@@ -89,7 +89,7 @@ const Chat = () => {
                 >Chats
                 </span>
 
-                <button className='bg-customBlue text-white px-2 py-2 rounded-lg flex items-center 
+                <button className='bg-customBlue text-white px-2 py-2 rounded-lg flex items-center
                 justify-center hover:bg-blue-700 transition-colors'>
                     <SquarePen size={20}/>
                 </button>
@@ -139,7 +139,7 @@ const Chat = () => {
                         {directMessages.map((dm) => (
                             <button
                             key={dm.id}
-                            className='w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 
+                            className='w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100
                             transition-colors flex items-center justify-between'
                             >
                                 <div className='flex items-center gap-2'>
@@ -213,7 +213,7 @@ const Chat = () => {
                 placeholder='Message'
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                className='flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none 
+                className='flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none
                 focus:border-customBlue'
                 />
                 <button

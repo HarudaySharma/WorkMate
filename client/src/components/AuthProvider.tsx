@@ -4,6 +4,14 @@ import { AuthContext } from "../hooks/useAuth"
 import env from "../zod"
 import { GoogleOAuthProvider } from "@react-oauth/google"
 
+
+const dummyUser: User = {
+    name: "dev",
+    email: "dev@mail.io",
+    username: "dev",
+    profilePicture: "https://avatars.githubusercontent.com/u/136163887?v=4",
+}
+
 function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [error, setError] = useState<ErrorFormat | null>(null)
