@@ -4,10 +4,12 @@ import { Menu, X } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import DarkModetoggler from '../DarkModetoggler';
 import UserProfile from '../UserProfile';
+import CreateWorkspaceModal from '../Workspace/CreateWorkspaceModal';
 
 const NavBar = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -77,7 +79,9 @@ const NavBar = () => {
                     {/*right part of div - only visible on larger screen*/}
 
                     <div className='hidden md:block'>
-                        <button className='bg-customYellow px-8 lg:px-12 py-2.5 font-semibold rounded-lg
+                        <button
+                        onClick={() => setIsCreateWorkspaceOpen(true)} 
+                        className='bg-customYellow px-8 lg:px-12 py-2.5 font-semibold rounded-lg
                         tracking-wide text-customBlack hover:font-bold font-nunito hover:bg-yellow-500
                         dark:border-customYellow dark:border-2 dark:bg-customBlack dark:text-gray-100 dark:hover:text-gray-700'>
                             CREATE WORKSPACE
@@ -122,6 +126,12 @@ const NavBar = () => {
                 )}
 
             </nav>
+
+            {isCreateWorkspaceOpen && (
+
+                <CreateWorkspaceModal 
+                onClose={() => setIsCreateWorkspaceOpen(false)}/>
+            )}
         </>
     )
 }
