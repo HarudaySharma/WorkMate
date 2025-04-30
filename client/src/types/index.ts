@@ -19,4 +19,15 @@ export interface GoogleUser {
     picture: string;
 }
 
+export type WorkSpace = {
+    // each workspace is a container for all kinds of functionality
+    id: number, // workSpace id
+    name: string,
+    creator_id: number,
+    // members: Member[], // join requests should also be there.
+    //    chats: string[] // Foreign Key (Chat.id)
+    //    // multiple chats in one workspace (one-one or group chats)
+}
+
 export type AuthProvider = "google" | "github" | "facebook";
+    

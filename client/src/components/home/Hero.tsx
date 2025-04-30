@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { PiHandWavingLight } from "react-icons/pi";
+import WorkspacesList from '../Workspace/WorkspacesList';
 
 
 const Hero = () => {
+
+    const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(false);
   return (
     <>
           <div className='flex flex-col lg:flex-row relative overflow-hidden font-nunito'>
@@ -28,7 +31,9 @@ const Hero = () => {
                           Create, Build, Collaborate, Manage and make work efficient
                       </p>
 
-                      <button className='bg-customYellow hover:bg-yellow-500 text-customBlack font-bold py-3 px-8 rounded-lg transition-colors'>
+                      <button
+                      onClick={() => setIsWorkspaceOpen(true)}
+                      className='bg-customYellow hover:bg-yellow-500 text-customBlack font-bold py-3 px-8 rounded-lg transition-colors'>
                           Get Started
                       </button>
                   </div>
@@ -40,9 +45,16 @@ const Hero = () => {
               {/*right side empty for now*/}
               <div className='hidden lg:block lg:w-2/5 bg-white dark:bg-[#242424]'></div>
 
+              <WorkspacesList
+              isOpen={isWorkspaceOpen}
+              onClose={() => setIsWorkspaceOpen(false)}
+              />
+
           </div>
     </>
   )
 }
 
 export default Hero
+
+
