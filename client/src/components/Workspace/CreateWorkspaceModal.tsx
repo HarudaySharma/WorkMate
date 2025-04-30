@@ -69,7 +69,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
     }
     return (
         <div className='fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='bg-white rounded-2xl w-full max-w-2xl p-8 relative'>
+            <div className='bg-gray-50 rounded-2xl w-full max-w-2xl p-8 relative border border-gray-200'>
                 {/* Close button */}
                 <button
                     onClick={onClose}

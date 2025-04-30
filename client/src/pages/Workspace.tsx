@@ -4,6 +4,7 @@ import { Bolt, CalendarCheck2, Home, Info, LogOut, MessageCircleMore, Plus, Sear
 import Chat from '../components/Workspace/Chat';
 import UserProfile from '../components/UserProfile';
 import { useParams } from 'react-router-dom';
+import CreateWorkspaceModal from '../components/Workspace/CreateWorkspaceModal';
 
 const Workspace = () => {
 
@@ -11,6 +12,7 @@ const Workspace = () => {
 
     const [isWorkspaceOpen, setIsWorkpaceOpen] = useState(false);
     const [activeTab, setIsActiveTab] = useState('home');
+    const [newWorkSpace, setNewWorkSpace] = useState(false);
 
     // Mock workspace data - replace with actual data later
     const workspaces = [
@@ -71,8 +73,10 @@ const Workspace = () => {
 
                             {/* Create new Workspace option */}
                             <div className="px-2 mt-2 pt-2 border-t">
-                                <button className="w-full px-3 py-2 text-left text-sm text-customBlue
-                            hover:bg-gray-50 rounded-md flex items-center gap-2">
+                                <button
+                                onClick={() => setNewWorkSpace(true)} 
+                                className="w-full px-3 py-2 text-left text-sm text-customBlue
+                              hover:bg-gray-50 rounded-md flex items-center gap-2">
                                     <Plus size={18} />
                                     <span>Create New Workspace</span>
                                 </button>
@@ -145,8 +149,10 @@ const Workspace = () => {
                     </div>
 
                     {/* Create New Workspace Button */}
-                    <button className='bg-customBlue text-white px-4 py-2 rounded-lg flex items-center space-x-2
-                hover:bg-blue-700 transition-colors'>
+                    <button 
+                    onClick={() => setNewWorkSpace(true)}
+                    className='bg-customBlue text-white px-4 py-2 rounded-lg flex items-center space-x-2
+                  hover:bg-blue-700 transition-colors'>
                         <Plus size={20} />
                         <span>Create New Workspace</span>
                     </button>
@@ -171,6 +177,10 @@ const Workspace = () => {
                     </div>
                 </div>
             </div>
+
+            {newWorkSpace && (
+                <CreateWorkspaceModal onClose={() => setNewWorkSpace(false)}/>
+            )}
         </div>
     )
 }

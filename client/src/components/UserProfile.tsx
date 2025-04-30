@@ -78,14 +78,7 @@ const UserProfile = () => {
 
 
                 {isUserOpen && (
-                    <div className='absolute right-0.5 mt-2 w-fit bg-white dark:bg-gray-200 rounded-lg shadow-lg py-2 z-50 flex-col'>
-                        {/* Will Open Profile Setting pop up */}
-                        <button className='w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100
-                            flex items-center gap-2'>
-                            <UserRoundPen size={18} />
-                            <span>Profile</span>
-                        </button>
-
+                    <div className='absolute right-0.5 mt-2 w-[260px] bg-white dark:bg-gray-200 rounded-xl shadow-xl py-3 z-50 flex-col'>
                         {/* User Info */}
                         <div className="flex flex-col text-center items-center gap-3">
                             <img
@@ -94,10 +87,18 @@ const UserProfile = () => {
                                 className="w-10 h-10 rounded-full"
                             />
                             <div>
-                                <p className="text-sm font-semibold dark:text-gray-400 mx-auto text-center w-full overflow-hidden">{user.username}</p>
-                                <p className="text-xs text-gray-500 mx-auto w-full overflow-hidden dark:text-gray-400">{user.email}</p>
+                                <p className="text-sm font-semibold dark:text-gray-700 mx-auto text-center w-full overflow-hidden">{user.username}</p>
+                                <p className="text-xs text-gray-500 mx-auto w-full overflow-hidden dark:text-gray-500">{user.email}</p>
                             </div>
                         </div>
+
+                        {/* Will Open Profile Setting pop up */}
+                        <button className='w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100
+                            flex items-center gap-2'>
+                            <UserRoundPen size={18} />
+                            <span>Profile</span>
+                        </button>
+
                         {/*<div className="flex justify-between items-center mt-3 mb-4">
                             <button
                                 onClick={handleOnDelete}
@@ -112,7 +113,7 @@ const UserProfile = () => {
                             <span>Themes</span>
                         </button>
 
-                        <div className='h-[1px] bg-gray-200 my-2'></div>
+                        <div className='h-[1px] bg-gray-200 dark:bg-gray-400 my-2'></div>
 
                         <button
                             className='w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100
