@@ -3,8 +3,11 @@ import logo from '../assets/logoWMnew-Photoroom.png'
 import { Bolt, CalendarCheck2, Home, Info, LogOut, MessageCircleMore, Plus, Search, SunMoon, User, UserRoundPen } from 'lucide-react'
 import Chat from '../components/Workspace/Chat';
 import UserProfile from '../components/UserProfile';
+import { useParams } from 'react-router-dom';
 
 const Workspace = () => {
+
+    const { workspaceId } = useParams()
 
     const [isWorkspaceOpen, setIsWorkpaceOpen] = useState(false);
     const [activeTab, setIsActiveTab] = useState('home');

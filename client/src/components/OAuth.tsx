@@ -2,8 +2,10 @@ import { useGoogleLogin } from '@react-oauth/google'
 import env from '../zod';
 import useAuth from '../hooks/useAuth';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { AuthProvider } from '../types';
+import toast from 'react-hot-toast';
+import toastOptions from '../config/toasterOptions';
 
 
 const OAuth = () => {
@@ -15,23 +17,25 @@ const OAuth = () => {
             try {
                 await sendToServer(response.access_token, "google")
                 await refetch();
+
+                toast.success("login successfull", toastOptions)
+
                 console.log({ user })
                 setTimeout(() => {
                     navigate("/")
                 }, 2000);
 
             } catch (err) {
-                alert(err)
+                toast.error(err as string, toastOptions)
             }
 
         },
-        onError: err => console.log(err),
+        onError: (err) => {
+            console.log(err)
+            toast.error(err as string, toastOptions)
+        },
         flow: 'implicit',
     })
-
-
-    const loginFacebook = () => {
-    }
 
     return (
         <>
@@ -53,17 +57,6 @@ const OAuth = () => {
                 <img src='https://www.svgrepo.com/show/512317/github-142.svg' alt='GitHub'
                     className='w-6 h-6' />
             </a>
-
-            <button
-                className='p-1.5 border border-gray-300 rounded-full hover:bg-gray-50 hover:cursor-pointer'
-                onClick={(e) => {
-                    e.preventDefault()
-                    loginFacebook()
-                }}
-            >
-                <img src='https://www.svgrepo.com/show/475647/facebook-color.svg' alt='Facebook'
-                    className='w-6 h-6 rounded-xl' />
-            </button>
         </>
     )
 }
@@ -73,12 +66,12 @@ const Callback = () => {
     const navigate = useNavigate()
     const { provider } = useParams() as { provider: AuthProvider }
 
-    const [text, setText] = useState("logging in....")
     const [searchParams] = useSearchParams()
 
     const code = searchParams.get("code")
 
     console.log({ provider, code })
+
 
     useEffect(() => {
         if (!code || !provider) {
@@ -88,7 +81,7 @@ const Callback = () => {
 
         sendToServer(code, provider)
             .then(() => {
-                setText("login successfull, redirecting to home page");
+                toast.success("login successfull, redirecting to home page", toastOptions);
                 refetch()
                     .then(() => {
                         console.log({ user })
@@ -98,7 +91,7 @@ const Callback = () => {
                     })
             })
             .catch((err) => {
-                setText("failed to login, please try again");
+                toast.error("failed to login, please try again", toastOptions);
                 console.log(err)
 
                 setTimeout(() => {
@@ -108,7 +101,7 @@ const Callback = () => {
     }, [])
 
     return (
-        <div>{text}</div>
+        <div>logging in...</div>
     )
 }
 

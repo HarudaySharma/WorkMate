@@ -7,6 +7,8 @@ import { useNavigate, NavLink } from "react-router-dom";
 import useAuth from '../hooks/useAuth';
 import useLogIn from '../hooks/useLogin';
 import OAuth from '../components/OAuth';
+import toast from 'react-hot-toast';
+import toastOptions from '../config/toasterOptions';
 
 
 interface IFormInput {
@@ -37,6 +39,12 @@ const Login = () => {
         })
 
     }
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error.message, toastOptions)
+        }
+    }, [error])
 
     useEffect(() => {
         if (logInState === "successfull") {
