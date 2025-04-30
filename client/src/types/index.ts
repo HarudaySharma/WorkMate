@@ -25,10 +25,13 @@ export type WorkSpace = {
     id: number, // workSpace id
     name: string,
     creator_id: number,
+    inviteLink: string;
     // members: Member[], // join requests should also be there.
     //    chats: string[] // Foreign Key (Chat.id)
     //    // multiple chats in one workspace (one-one or group chats)
 }
+
+export type WorkSpaceOmitInviteLink = Omit<WorkSpace, 'invite_link'>
 
 export type AuthProvider = "google" | "github" | "facebook";
 

@@ -6,6 +6,7 @@ import db from "../../services/mqsql/mysql.service.js";
 import logger from "../../logger.js";
 import Workmate from "../../services/workmate/workmate.service.js";
 import { WorkmateError } from "../../types/workspace.service.js";
+import generateInviteToken from "../../utils/generateInviteLink.js";
 
 
 // TODO: test all these routes
@@ -108,6 +109,7 @@ export const createWorkspace = async (req: Request, res: Response, next: NextFun
     }
 
     const { name, inviteLink } = req.body;
+    logger.info({body: req.body})
 
     if (name === undefined || inviteLink === undefined) {
         next(new Errorr("Insufficient data provided", StatusCodes.BAD_REQUEST));
@@ -261,4 +263,10 @@ export const getWorkspaceMembers = async (req: Request, res: Response, next: Nex
     }
 }
 
+export const getInviteToken = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: GET /workspace/inviteLink")
 
+    const uniqueInviteLink = generateInviteToken()
+
+    res.json({token: uniqueInviteLink})
+}

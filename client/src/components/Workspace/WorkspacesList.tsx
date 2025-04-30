@@ -1,22 +1,10 @@
 import { Plus } from 'lucide-react';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import useAuth from '../../hooks/useAuth';
 import useWorkspaceList from '../../hooks/useWorkspaceList';
 import toast from 'react-hot-toast';
 import Loader from '../Loader';
-
-export type Workspace = {
-    id: number;
-    name: string;
-    creator_id: number;
-};
-
-//Mock data
-const workspaces: Workspace[] = [
-    { id: 1, name: 'Personal Project', creator_id: 1 },
-    { id: 2, name: 'Team Alpha', creator_id: 1 },
-    { id: 3, name: 'Design Team', creator_id: 2 },
-]
+import CreateWorkspaceModal from './CreateWorkspaceModal';
 
 interface WorkspacesListProps {
     onClose: () => void
@@ -24,10 +12,10 @@ interface WorkspacesListProps {
 
 const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
 
-
     const { user } = useAuth();
     const { data, error, isFetching } = useWorkspaceList()
 
+    const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false)
 
     useEffect(() => {
         if (error) {
@@ -65,8 +53,11 @@ const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
                     {/* Workspace Grid */}
                     <div className='grid grid-col-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                         {/* Create New Workspace Card */}
-                        <div className='border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col
-                    items-center justify-center hover:border-customBlue transition-colors cursor-pointer'>
+                        <div
+                            className='border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col
+                    items-center justify-center hover:border-customBlue transition-colors cursor-pointer'
+                            onClick={() => setIsCreateWorkspaceOpen(true)}
+                        >
 
                             <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4'>
                                 <Plus size={32} className='text-gray-500' />
@@ -98,6 +89,10 @@ const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
                 </>}
             </div>
 
+            {isCreateWorkspaceOpen && (
+                <CreateWorkspaceModal
+                    onClose={() => setIsCreateWorkspaceOpen(false)} />
+            )}
         </div>
     )
 }

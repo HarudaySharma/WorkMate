@@ -1,12 +1,13 @@
 import { Router } from "express";
 
 import { verifyToken } from "../../middlewares/verifyToken.middleware.js";
-import { createWorkspace, deleteWorkspace, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
+import { createWorkspace, deleteWorkspace, getInviteToken, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
 
 const router = Router();
 
 // we need to verify whether user is logged in or not, so that we can extract id from itspayload
 router.get("/all", verifyToken, getUserWorkspaces);
+router.get("/inviteToken", verifyToken, getInviteToken);
 router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
 router.get("/:workspaceId", verifyToken, getWorkspace);
 
