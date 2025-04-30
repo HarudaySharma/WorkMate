@@ -1,5 +1,7 @@
 import { Plus, Send, SquarePen } from 'lucide-react'
 import React, { useState } from 'react'
+import NewGroupChat from './NewGroupChat';
+import NewDirectMessage from './NewDirectMessage';
 
 interface Channel {
     id: number;
@@ -26,6 +28,8 @@ interface Message {
 const Chat = () => {
 
     const [newMessage, setNewMessage] = useState('');
+    const [showNewGroup, setShowNewGroup] = useState(false);
+    const [showNewDirect, setShowNewDirect] = useState(false);
 
     //Mock data for Channels and Direct Messages
     const channels: Channel[] = [
@@ -100,8 +104,10 @@ const Chat = () => {
                 {/* Channel Section */}
                 <div className='p-4'>
                     <div className='flex items-center justify-between mb-4'>
-                        <h3 className='text-sm font-semibold text-gray-500'>CHANNELS</h3>
-                        <button className='text-gray-400 hover:text-gray-600'>
+                        <h3 className='text-sm font-semibold text-gray-500'>Group Chats</h3>
+                        <button
+                        onClick={() => setShowNewGroup(true)}
+                        className='text-gray-400 hover:text-gray-600'>
                             <Plus size={16}/>
                         </button>
                     </div>
@@ -129,7 +135,9 @@ const Chat = () => {
                 <div className='p-4 border-t border-gray-200'>
                     <div className='flex items-center justify-between mb-4'>
                         <h3 className='text-sm font-semibold text-gray-500'>Direct Messages</h3>
-                        <button className='text-gray-400 hover:text-gray-500'>
+                        <button
+                        onClick={() => setShowNewDirect(true)} 
+                        className='text-gray-400 hover:text-gray-500'>
                             <Plus size={16}/>
                         </button>
                     </div>
@@ -224,6 +232,9 @@ const Chat = () => {
                 </button>
             </form>
         </div>
+
+        {showNewGroup && <NewGroupChat onClose={() => setShowNewGroup(false)}/>}
+        {showNewDirect && <NewDirectMessage onClose={() => setShowNewDirect(false)}/>}
 
     </div>
   )
