@@ -7,13 +7,23 @@ import { AuthProvider } from '../types';
 
 
 const OAuth = () => {
+    const navigate = useNavigate();
     const { user, refetch } = useAuth();
 
     const loginGoogle = useGoogleLogin({
         onSuccess: async (response) => {
-            await sendToServer(response.access_token, "google")
-            await refetch();
-            console.log({ user })
+            try {
+                await sendToServer(response.access_token, "google")
+                await refetch();
+                console.log({ user })
+                setTimeout(() => {
+                    navigate("/")
+                }, 2000);
+
+            } catch (err) {
+                alert(err)
+            }
+
         },
         onError: err => console.log(err),
         flow: 'implicit',
@@ -103,19 +113,23 @@ const Callback = () => {
 }
 
 async function sendToServer(code: string, provider: AuthProvider) {
-    const res = await fetch(`${env.VITE_API_URL}/api/auth/oauth/${provider}?redirect_uri=${env.VITE_GITHUB_REDIRECT_URI}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ code: code, })
-    })
-
-    if (res.ok) {
-        console.log(await res.json())
+    try {
+        const res = await fetch(`${env.VITE_API_URL}/api/auth/oauth/${provider}?redirect_uri=${env.VITE_GITHUB_REDIRECT_URI}`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ code: code, })
+        })
+        if (res.ok) {
+            console.log(await res.json())
+        }
+    } catch (err) {
+        console.log(err)
     }
 }
+
 
 
 OAuth.Callback = Callback;

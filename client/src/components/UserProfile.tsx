@@ -3,11 +3,11 @@ import { MdDelete } from 'react-icons/md'
 import useAuth from '../hooks/useAuth'
 import { useState } from 'react';
 import env from '../zod';
+import { LogOut, SunMoon, UserRoundPen } from 'lucide-react';
 
 const UserProfile = () => {
     const { user, setUser } = useAuth();
     const [isUserOpen, setIsUserOpen] = useState(false);
-
 
     const toggleUser = () => {
         setIsUserOpen(!isUserOpen);
@@ -78,8 +78,13 @@ const UserProfile = () => {
 
 
                 {isUserOpen && (
-                    <div className='absolute left-1/2 transform -translate-x-1/2 translate-y-1/2 mt-2 w-fit bg-white
-                            shadow-lg z-50 py-2 px-6 flex flex-col gap-3 dark:bg-[#333333] rounded-lg'>
+                    <div className='absolute right-0.5 mt-2 w-fit bg-white dark:bg-gray-200 rounded-lg shadow-lg py-2 z-50 flex-col'>
+                        {/* Will Open Profile Setting pop up */}
+                        <button className='w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100
+                            flex items-center gap-2'>
+                            <UserRoundPen size={18} />
+                            <span>Profile</span>
+                        </button>
 
                         {/* User Info */}
                         <div className="flex flex-col text-center items-center gap-3">
@@ -89,30 +94,36 @@ const UserProfile = () => {
                                 className="w-10 h-10 rounded-full"
                             />
                             <div>
-                                <p className="text-sm font-semibold dark:text-gray-200">{user.username}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                                <p className="text-sm font-semibold dark:text-gray-400 mx-auto text-center w-2/3 overflow-scroll">{user.username}</p>
+                                <p className="text-xs text-gray-500 mx-auto w-2/3 overflow-scroll dark:text-gray-400">{user.email}</p>
                             </div>
                         </div>
-
-                        {/* Actions */}
-                        <div className="flex justify-between items-center mt-3 mb-4">
+                        {/*<div className="flex justify-between items-center mt-3 mb-4">
                             <button
                                 onClick={handleOnDelete}
                                 className="text-red-500 hover:text-red-600 cursor-pointer"
                             >
                                 <MdDelete className="w-5 h-5" />
                             </button>
-                            <button
-                                onClick={handleOnLogout}
-                                className="text-gray-700 hover:text-gray-900 dark:text-gray-300 cursor-pointer"
-                            >
-                                <FiLogOut className="w-5 h-5" />
-                            </button>
-                        </div>
+                        </div>*/}
+                        <button className='w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100
+                            flex items-center gap-2'>
+                            <SunMoon size={18} />
+                            <span>Themes</span>
+                        </button>
 
+                        <div className='h-[1px] bg-gray-200 my-2'></div>
+
+                        <button
+                            className='w-full px-4 py-2 text-left text-red-600 hover:bg-gray-100
+                            flex items-center gap-2'
+                            onClick={handleOnLogout}
+                        >
+                            <LogOut size={18} />
+                            <span>Log Out</span>
+                        </button>
                     </div>
                 )}
-
             </div>
         </>
     )
