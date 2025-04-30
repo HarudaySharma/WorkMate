@@ -1,13 +1,28 @@
 import { FiLogOut } from 'react-icons/fi'
 import { MdDelete } from 'react-icons/md'
 import useAuth from '../hooks/useAuth'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import env from '../zod';
 import { LogOut, SunMoon, UserRoundPen } from 'lucide-react';
+import { User } from '../types';
+
+const dummyUser: User = {
+    name: "dev",
+    email: "dev@mail.io",
+    username: "dev",
+    profilePicture: "https://avatars.githubusercontent.com/u/136163887?v=4",
+}
 
 const UserProfile = () => {
     const { user, setUser } = useAuth();
     const [isUserOpen, setIsUserOpen] = useState(false);
+
+    // only for dev
+    useEffect(() => {
+        if(!user) {
+            setUser(dummyUser)
+        }
+    },[user, dummyUser])
 
     const toggleUser = () => {
         setIsUserOpen(!isUserOpen);
@@ -58,6 +73,7 @@ const UserProfile = () => {
     if (!user) {
         return (<></>)
     }
+
     return (
         <>
             {/*Profile Picture*/}
