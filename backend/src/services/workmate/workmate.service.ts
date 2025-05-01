@@ -43,6 +43,7 @@ import ChatRepository from "../mqsql/ChatRepository.service";
 import ChatMemberRepository from "../mqsql/ChatMemberRepository.service";
 import MessageRepository from "../mqsql/MessageRepository.service";
 import MessageRecipientRepository from "../mqsql/MessageRecipientRepository.service";
+import { Chat } from "../../database_schema";
 
 class Workmate {
     // how should it perform the task?
@@ -207,7 +208,7 @@ class Workmate {
         }
     }
 
-    async createChat({ chat, userId }: CreateChatParams): Promise<CreateChatRet> {
+    async createChat({ chat, userId, recieverId }: CreateChatParams): Promise<CreateChatRet> {
         try {
 
             const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
@@ -232,21 +233,52 @@ class Workmate {
             await this.#db.startTransaction()
 
             const chatRepo = new ChatRepository(await this.#db.getConnection())
-            const { id: chatId } = await chatRepo.add({
-                name: chat.name,
-                workspace_id: chat.workspace_id,
-                type: chat.type,
-            })
-
             const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
-            await chatMembersRepo.add({
-                user_id: userId,
-                chat_id: chatId,
-                role: 'admin', // user creating the chat should be "admin"
-            });
+
+            let chatId: Chat["id"] | undefined;
+            if (chat.type === 'group') {
+                const { id } = await chatRepo.add({
+                    name: chat.name,
+                    workspace_id: chat.workspace_id,
+                    type: chat.type,
+                })
+                chatId = id;
+
+                await chatMembersRepo.add({
+                    user_id: userId,
+                    chat_id: chatId,
+                    role: 'admin', // user creating the chat should be "admin"
+                });
+            } else if (chat.type === 'one-one') {
+                if (!recieverId) {
+                    throw new WorkmateError("USER_ERROR", `reciever can not be found, recieverId missing`, StatusCodes.UNAUTHORIZED)
+                }
+
+                const { id } = await chatRepo.add({
+                    name: null,
+                    workspace_id: chat.workspace_id,
+                    type: chat.type,
+                })
+                chatId = id;
+
+                await chatMembersRepo.add({
+                    user_id: recieverId,
+                    chat_id: chatId,
+                    role: 'admin', // user should also be the admin
+                });
+                await chatMembersRepo.add({
+                    user_id: userId,
+                    chat_id: chatId,
+                    role: 'admin', // reciever should also be the admin
+                });
+            }
+
+            if (!chatId) {
+                // fallback for safety — shouldn't be reached
+                throw new WorkmateError('DATA_PERSISTENCE_ERROR', 'Chat ID could not be resolved', StatusCodes.INTERNAL_SERVER_ERROR);
+            }
 
             const insertedChat = await chatRepo.find({ id: chatId });
-
             if (insertedChat === null) {
                 // should not happen as the chat was just created
                 await this.#db.transactionRollback();
@@ -408,6 +440,7 @@ class Workmate {
                         }
 
                         return {
+                            id: usr.id,
                             username: usr.username,
                             name: usr.name,
                             email: usr.email,

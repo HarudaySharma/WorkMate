@@ -23,7 +23,7 @@ export const createChat = async (req: Request, res: Response, next: NextFunction
     }
 
     const { workspaceId } = req.params;
-    const { chat } = req.body as { chat: Chat }
+    const { chat, recieverId } = req.body as { chat: Chat, recieverId: number }
 
     if (workspaceId === undefined) {
         next(new Errorr("no Workspace Id provided", StatusCodes.UNAUTHORIZED));
@@ -35,6 +35,7 @@ export const createChat = async (req: Request, res: Response, next: NextFunction
 
         const ret = await workmate.createChat({
             userId: userId,
+            recieverId: recieverId,
             chat: {
                 name: chat.name,
                 type: chat.type,

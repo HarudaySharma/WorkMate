@@ -31,6 +31,7 @@ export class WorkmateReturnObj {
 
 export interface CreateChatParams {
     chat: Omit<Chat, "last_message_at" | "id">;
+    recieverId?: User["id"];
     userId: User["id"];
 }
 
@@ -158,7 +159,7 @@ export interface DeleteChatRet extends WorkmateReturnObj { }
 
 export interface GetWorkspaceMembersRet extends WorkmateReturnObj {
     data: {
-        members: (Pick<WorkspaceMember, "role"> & Pick<User, "username" | "name" | "email" | "profile_picture">)[]
+        members: (Pick<WorkspaceMember, "role"> & Pick<User, "id" | "username" | "name" | "email" | "profile_picture">)[]
     }
 }
 

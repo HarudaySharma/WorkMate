@@ -33,7 +33,7 @@ export type WorkSpace = {
 
 export type Chat = {
     id: number, // chat id
-    name: string, // type == group ? "group name" : "reciever name"
+    name: string | null, // type == group ? "group name" : "reciever name"
     type: 'group' | 'one-one',
     workspace_id: number // Foreign Key (WorkSpace.id)
     last_message_at: Date | null,
@@ -49,7 +49,16 @@ export type ChatMember = {
 
 export interface ChatMemberReturn extends Pick<User, "name" | "username" | "email" | "profile_picture" | "id">, Pick<ChatMember, "role" | "joined_at"> { };
 
-export type WorkSpaceOmitInviteLink = Omit<WorkSpace, 'invite_link'>
+
+export type WorkspaceMember = {
+    user_id: number, // Foreign Key (User.id)
+    workspace_id: number, // Foreign Key (WorkSpace.id)
+    role: 'admin' | 'member',
+}
+
+export interface WorkspaceMemberReturn extends Pick<WorkspaceMember, "role">, Pick<User, "id" | "username" | "name" | "email" | "profile_picture"> {}
+
+export type WorkSpaceOmitInviteLink = Omit<WorkSpace, 'invite_link'>;
 
 export type AuthProvider = "google" | "github" | "facebook";
 

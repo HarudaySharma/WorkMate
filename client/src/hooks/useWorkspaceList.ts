@@ -1,5 +1,5 @@
 import env from "../zod"
-import { WorkSpaceOmitInviteLink } from "../types"
+import { ErrorFormat, WorkSpaceOmitInviteLink } from "../types"
 import { useQuery } from "@tanstack/react-query"
 
 
@@ -12,6 +12,9 @@ const useWorkspaceList = () => {
                 credentials: "include",
             })
 
+            if(!resp.ok) {
+                throw (await resp.json()) as ErrorFormat;
+            }
             return (await resp.json()).data.workspaces as WorkSpaceOmitInviteLink[];
         }
     })

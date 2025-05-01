@@ -27,7 +27,7 @@ export type WorkSpace = {
 
 export type Chat = {
     id: number, // chat id
-    name: string, // type == group ? "group name" : "reciever name"
+    name: string | null, // type == group ? "group name" : "reciever name"
     type: 'group' | 'one-one',
     workspace_id: number // Foreign Key (WorkSpace.id)
     last_message_at: Date | null,

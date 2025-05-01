@@ -5,13 +5,16 @@ import toast from 'react-hot-toast';
 import getChatMembers from '../../../utils/getChatMembers';
 import useAuth from '../../../hooks/useAuth';
 import useChatContext from '../../../hooks/useChatContext';
+import NewGroupChat from './NewGroupChat';
+import NewDirectMessage from './NewDirectMessage';
 
 export interface ChatListParams {
     chats: Chat[],
 }
 
 function ChatList({ chats }: ChatListParams) {
-    const { setShowNewGroup, setShowNewDirect } = useChatContext()
+    const [showNewGroup, setShowNewGroup] = useState(false);
+    const [showNewDirect, setShowNewDirect] = useState(false);
 
     const groupChats = chats.filter(chat => chat.type === 'group')
     const oneOneChats = chats.filter(chat => chat.type === 'one-one')
@@ -48,6 +51,12 @@ function ChatList({ chats }: ChatListParams) {
                     <OneOneChatList chats={oneOneChats} />
                 </div>
             </div>
+            {showNewGroup && <NewGroupChat onClose={() => setShowNewGroup(false)} />}
+            {showNewDirect &&
+                <NewDirectMessage
+                    existingMemberChats={oneOneChats}
+                    onClose={() => setShowNewDirect(false)}
+                />}
         </div >
     )
 }
@@ -55,7 +64,14 @@ function ChatList({ chats }: ChatListParams) {
 export default ChatList
 
 
-type OneOneChat = Extract<Chat, { type: 'one-one' }>;
+// type OneOneChat = Extract<Chat, { type: 'one-one' }>;
+
+
+type ChatRecieverState = {
+    [chatId: number]: ChatMemberReturn;
+};
+
+
 export interface OneOneChatListParams {
     chats: Chat[]// chats with type as group
 }
@@ -65,12 +81,7 @@ function OneOneChatList({ chats }: OneOneChatListParams) {
     const { user } = useAuth()
 
 
-    const chatReciever = new Map<number, ChatMemberReturn>()
-    const [reload, setReload] = useState(false)
-
-    useEffect(() => {
-        console.log("reloading...")
-    }, [reload])
+    const [chatReciever, setChatReciever] = useState<ChatRecieverState>({})
 
     useEffect(() => {
         try {
@@ -81,12 +92,10 @@ function OneOneChatList({ chats }: OneOneChatListParams) {
 
             chats.forEach(async (chat) => {
                 const mbrs = await getChatMembers({ chatId: chat.id, workspaceId: +workspaceId })
-                console.log(mbrs)
                 const reciever = mbrs.find(mbr => mbr.id !== user?.id);
 
                 if (reciever) {
-                    chatReciever.set(chat.id, reciever)
-                    setReload(prev => !prev);
+                    setChatReciever({ ...chatReciever, [chat.id]: reciever })
                 }
             })
         } catch (err) {
@@ -95,12 +104,11 @@ function OneOneChatList({ chats }: OneOneChatListParams) {
         // get the chat members from server and show it to the user.
     }, [chats])
 
-
     return (
         <div className='space-y-2'>
             {chats.map((chat) => (
                 <button
-                    key={chat.id + chat.name}
+                    key={chat.id}
                     onClick={() => changeSelectedChat(chat)}
                     className='w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100
                             transition-colors flex items-center justify-between'
@@ -108,8 +116,8 @@ function OneOneChatList({ chats }: OneOneChatListParams) {
                     <div className='flex items-center gap-2'>
                         <div className='relative'>
                             <img
-                                src={chatReciever.get(chat.id)?.profile_picture || ""}
-                                alt={chat.name}
+                                src={chatReciever[chat.id]?.profile_picture}
+                                alt={chatReciever[chat.id]?.username}
                                 className='w-6 h-6 rounded-full'
                             />
                             {/*<div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full
@@ -117,7 +125,7 @@ function OneOneChatList({ chats }: OneOneChatListParams) {
                                         ${dm.status === 'online' ? 'bg-green-500' : dm.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'}`} />
                                         */}
                         </div>
-                        <span className='text-gray-700'>{chat.name}</span>
+                        <span className='text-gray-700'>{chatReciever[chat.id]?.name || chatReciever[chat.id]?.username}</span>
                     </div>
                     {/*dm.unread > 0 && (
                         <span className='bg-customBlue text-white text-xs px-2 py-1 rounded-full'>
@@ -130,18 +138,18 @@ function OneOneChatList({ chats }: OneOneChatListParams) {
     )
 }
 
-type GroupChat = Extract<Chat, { type: 'group' }>;
+// type GroupChat = Extract<Chat, { type: 'group' }>;
 export interface GroupChatListParams {
     chats: Chat[] // chats with type as group
 }
 
 function GroupsList({ chats }: GroupChatListParams) {
-    const {setSelectedChat: changeSelectedChat} = useChatContext()
+    const { setSelectedChat: changeSelectedChat } = useChatContext()
     return (
         <div className='space-y-2'>
             {chats.map((chat) => (
                 <button
-                    key={chat.id + chat.name}
+                    key={chat.id + chat.name! /*there will always be a name of group chats*/}
                     onClick={() => changeSelectedChat(chat)}
                     className='w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors
                             flex items-center justify-between'

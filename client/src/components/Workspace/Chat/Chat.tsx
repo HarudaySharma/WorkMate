@@ -1,24 +1,21 @@
 import { SquarePen } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import NewGroupChat from './NewGroupChat';
-import NewDirectMessage from './NewDirectMessage';
 import useWorkspaceChatList from '../../../hooks/useWorkspaceChatList';
 import ChatList from './ChatList';
 import { ChatContext, ChatContextType } from '../../../hooks/useChatContext';
 import Loader from '../../Loader';
 import MessageArea from './MessageArea';
 import { Chat as ChatType } from '../../../types';
+import toast from 'react-hot-toast';
 
 interface ChatProps {
     workspaceId: number;
 }
 
 const Chat = ({ workspaceId }: ChatProps) => {
-    const [showNewGroup, setShowNewGroup] = useState(false);
-    const [showNewDirect, setShowNewDirect] = useState(false);
 
     const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);
-    const { data: chats, refetch, isFetching } = useWorkspaceChatList({ workspaceId: workspaceId });
+    const { data: chats, refetch, isFetching, error } = useWorkspaceChatList({ workspaceId: workspaceId });
 
     useEffect(() => {
     }, [selectedChat])
@@ -29,9 +26,11 @@ const Chat = ({ workspaceId }: ChatProps) => {
         },
         refetchChatList: refetch,
         selectedChat,
-        setShowNewDirect,
-        setShowNewGroup,
         setSelectedChat,
+    }
+
+    if(error) {
+        toast.error(error.message)
     }
 
     return (
@@ -60,8 +59,6 @@ const Chat = ({ workspaceId }: ChatProps) => {
 
                 <MessageArea />
 
-                {showNewGroup && <NewGroupChat onClose={() => setShowNewGroup(false)} />}
-                {showNewDirect && <NewDirectMessage onClose={() => setShowNewDirect(false)} />}
 
             </div>
         </ChatContext.Provider>

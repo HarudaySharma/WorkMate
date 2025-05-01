@@ -3,11 +3,12 @@ import env from "../zod"
 
 export interface CreateChatParams {
     workspaceId: number;
-    chatName: string;
+    chatName: string | null;
+    recieverId?: number
     chatType: 'group' | 'one-one';
 }
 
-export default async function createChat({chatName, chatType, workspaceId}: CreateChatParams) {
+export default async function createChat({chatName, chatType, workspaceId, recieverId}: CreateChatParams) {
     const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}`, {
         method: "PUT",
         headers: {
@@ -18,7 +19,8 @@ export default async function createChat({chatName, chatType, workspaceId}: Crea
             chat: {
                 name: chatName,
                 type: chatType,
-            }
+            },
+            recieverId: recieverId,
         }),
         credentials: 'include',
     })

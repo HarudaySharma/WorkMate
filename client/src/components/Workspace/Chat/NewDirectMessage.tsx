@@ -1,30 +1,38 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import useChatContext from '../../../hooks/useChatContext';
 import toast from 'react-hot-toast';
 import createChat from '../../../utils/createChat';
-import { ErrorFormat } from '../../../types';
-
-interface WorkspaceMember {
-    id: number;
-    name: string;
-    avatar: string;
-}
+import { Chat, ErrorFormat, WorkspaceMemberReturn } from '../../../types';
+import useWorkspaceMembersList from '../../../hooks/useWorkspaceMembersList';
+import Loader from '../../Loader';
 
 interface NewDirectMessageProp {
     onClose: () => void;
+    existingMemberChats: Chat[];
 }
 
 // mock members
-const members: WorkspaceMember[] = [
-    { id: 1, name: 'Alice', avatar: '/avatars/alice.png' },
-    { id: 2, name: 'Bob', avatar: '/avatars/bob.png' },
-];
+const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose, existingMemberChats}) => {
 
-const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose }) => {
+    const { workspace: { id: workspaceId }, refetchChatList, setSelectedChat } = useChatContext()
 
-    const {workspace: {id: workspaceId}} = useChatContext()
+    const { data: members, isFetching } = useWorkspaceMembersList({
+        workspaceId,
+    })
 
-    const handleSelect = async() => {
+    const [shownMembers, setShownMembers] = useState<WorkspaceMemberReturn[]>([])
+
+
+    // Temporary fix
+    useEffect(() => {
+        if (members) {
+            const alreadyPresent = new Set();
+            existingMemberChats.forEach(chat => alreadyPresent.add(chat.name))// chat name will be the recievers username
+            setShownMembers(members.filter(mbr => alreadyPresent.has(mbr.username)))
+        }
+    }, [members])
+
+    const handleSelect = async (member: WorkspaceMemberReturn) => {
         // add to direct messages
         if (!workspaceId) {
             toast.error("something's wrong, missing workspaceId")
@@ -33,10 +41,14 @@ const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose }) => {
 
         try {
             const chat = await createChat({
-                chatName: "dummy",
+                chatName: null,
+                recieverId: member.id,
                 chatType: 'one-one',
                 workspaceId: +workspaceId,
             })
+
+            setSelectedChat(chat)
+            refetchChatList()
         } catch (err) {
             toast.error((err as ErrorFormat).message)
         }
@@ -54,14 +66,15 @@ const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose }) => {
                 </button>
                 <h2 className='text-2xl font-bold mb-4'>New Direct Message</h2>
                 <div className='space-y-4 max-h-80 overflow-y-auto'>
-                    {members.map((member) => (
+                    {isFetching && <Loader height={'12'} width={'12'} />}
+                    {shownMembers?.map((member) => (
                         <div
                             key={member.id}
-                            onClick={() => handleSelect}
-                            className='flex items-center gap-4 p-2 rounded-lg hover:bg-gray-100 cursor-pointer'
+                            onClick={() => handleSelect(member)}
+                            className='flex items-center gap-4 p-2 rounded-lg border-none outline-2 outline-gray-200 hover:bg-gray-100 cursor-pointer'
                         >
-                            <img src={member.avatar} alt={member.name} className='w-8 h-8 rounded-full' />
-                            <span className='text-gray-700'>{member.name}</span>
+                            <img src={member.profile_picture} alt={member.name || member.username} className='w-8 h-8 rounded-full' />
+                            <span className='text-gray-700'>{member.username}</span>
                         </div>
                     ))}
                 </div>
