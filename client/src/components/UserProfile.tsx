@@ -70,7 +70,7 @@ const UserProfile = () => {
                     onClick={toggleUser}
                 >
                     <img
-                        src={user.profilePicture}
+                        src={user.profile_picture}
                         alt="User Avatar"
                         className='md:h-10 md:w-10 dark:text-gray-300 w-8 h-8 rounded-full hover:cursor-pointer'
                     />
@@ -82,7 +82,7 @@ const UserProfile = () => {
                         {/* User Info */}
                         <div className="flex flex-col text-center items-center gap-3">
                             <img
-                                src={user.profilePicture}
+                                src={user.profile_picture}
                                 alt="User Avatar"
                                 className="w-10 h-10 rounded-full"
                             />

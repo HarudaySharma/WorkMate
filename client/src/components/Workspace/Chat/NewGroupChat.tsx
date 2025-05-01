@@ -2,14 +2,15 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { ErrorFormat } from '../../../types'
 import createChat from '../../../utils/createChat'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import useChatContext from '../../../hooks/useChatContext'
 
 interface NewGroupChatProp {
     onClose: () => void
 }
 
 const NewGroupChat: React.FC<NewGroupChatProp> = ({ onClose }) => {
-    const navigate = useNavigate();
+    const {setSelectedChat, refetchChatList} = useChatContext();
 
     const {workspaceId} = useParams()
 
@@ -34,10 +35,10 @@ const NewGroupChat: React.FC<NewGroupChatProp> = ({ onClose }) => {
                 workspaceId: +workspaceId,
             })
 
-            // show user the chat box for this chat and add this chat in the list.
-            navigate(`workspace/${chat.workspace_id}/${chat.id}`)
+            setSelectedChat(chat)
+            refetchChatList()
 
-
+            onClose()
         } catch(err) {
             toast.error((err as ErrorFormat).message)
         }

@@ -5,6 +5,7 @@ import useWorkspaceList from '../../hooks/useWorkspaceList';
 import toast from 'react-hot-toast';
 import Loader from '../Loader';
 import CreateWorkspaceModal from './CreateWorkspaceModal';
+import { useNavigate } from 'react-router-dom';
 
 interface WorkspacesListProps {
     onClose: () => void
@@ -12,6 +13,7 @@ interface WorkspacesListProps {
 
 const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
 
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { data, error, isFetching } = useWorkspaceList()
 
@@ -70,6 +72,7 @@ const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
                         {data.map((workspace) => (
                             <div
                                 key={workspace.id}
+                                onClick={() => navigate(`/workspace/${workspace.id}`)}
                                 className='bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg
                         transition-shadow cursor-pointer'
                             >

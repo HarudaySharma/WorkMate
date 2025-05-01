@@ -19,7 +19,6 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
         e.preventDefault()
 
         try {
-            //const uniqueId = Math.random().toString(36).substring(2, 15);
             const inviteLink = await getInviteLink();
             setInviteLink(inviteLink);
         } catch (err) {

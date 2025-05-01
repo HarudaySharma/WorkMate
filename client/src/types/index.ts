@@ -8,7 +8,7 @@ export interface User {
     name?: string,
     username: string,
     email: string,
-    profilePicture: string,
+    profile_picture: string,
 }
 
 export interface GoogleUser {
@@ -30,6 +30,24 @@ export type WorkSpace = {
     //    chats: string[] // Foreign Key (Chat.id)
     //    // multiple chats in one workspace (one-one or group chats)
 }
+
+export type Chat = {
+    id: number, // chat id
+    name: string, // type == group ? "group name" : "reciever name"
+    type: 'group' | 'one-one',
+    workspace_id: number // Foreign Key (WorkSpace.id)
+    last_message_at: Date | null,
+    // participants: ChatMember[], // chat members
+}
+
+export type ChatMember = {
+    chat_id: number;
+    user_id: number;
+    joined_at: Date;
+    role: 'admin' | 'member',
+}
+
+export interface ChatMemberReturn extends Pick<User, "name" | "username" | "email" | "profile_picture" | "id">, Pick<ChatMember, "role" | "joined_at"> { };
 
 export type WorkSpaceOmitInviteLink = Omit<WorkSpace, 'invite_link'>
 
