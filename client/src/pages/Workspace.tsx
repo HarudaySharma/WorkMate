@@ -6,6 +6,7 @@ import UserProfile from '../components/UserProfile';
 import { useParams } from 'react-router-dom';
 import CreateWorkspaceModal from '../components/Workspace/CreateWorkspaceModal';
 import toast from 'react-hot-toast';
+import WorkSpaceInfo from '../components/Workspace/WorkSpaceInfo';
 
 const Workspace = () => {
 
@@ -175,6 +176,9 @@ const Workspace = () => {
                 border-gray-300 drop-shadow-lg'>
                         {activeTab === 'chat' ? (
                             <Chat workspaceId={+workspaceId} />
+
+                        ) : activeTab === 'info' ?(
+                            <WorkSpaceInfo/>
                         ) : (
                             <div className='flex items-center justify-center h-full text-gray-500'>
                                 Select Tab to view content.
