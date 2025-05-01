@@ -68,11 +68,13 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
     }
     return (
         <div className='fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50'>
-            <div className='bg-gray-50 rounded-2xl w-full max-w-2xl p-8 relative border border-gray-200'>
+            <div className='bg-gray-50 rounded-2xl w-full max-w-2xl p-8 relative border border-gray-200
+            dark:bg-[#242424]'>
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className='absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl'
+                    className='absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl 
+                    dark:text-gray-100 dark:hover:text-gray-400'
                 >
                     ×
                 </button>
@@ -81,10 +83,10 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                 {step === 1 ? (
                     <>
                         <div className='text-center mb-8'>
-                            <h2 className='text-3xl font-bold text-gray-800'>
+                            <h2 className='text-3xl font-bold text-gray-800 dark:text-gray-200'>
                                 What would you like to name your Workspace?
                             </h2>
-                            <p className='text-gray-600 mt-2'>
+                            <p className='text-gray-600 mt-2 dark:text-gray-400 '>
                                 Try the name of your company or organization.
                             </p>
                         </div>
@@ -95,7 +97,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                             value={workspaceName}
                             onChange={(e) => setWorkspaceName(e.target.value)}
                             className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none
-                focus:border-customBlue'
+                focus:border-customBlue dark:focus:border-customYellow dark:text-gray-200'
                         />
 
                         <div className='mt-8 flex justify-end'>
@@ -103,7 +105,8 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                                 onClick={() => setStep(2)}
                                 disabled={!workspaceName.trim()}
                                 className='bg-customBlue text-white px-6 py-2 rounded-lg hover:bg-blue-700
-                    transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed'
+                    transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed 
+                    dark:bg-customYellow dark:text-gray-700 dark:hover:bg-yellow-500'
                             >
                                 Next ˃
                             </button>
@@ -112,10 +115,10 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                 ) : (
                     <>
                         <div className='text-center mb-8'>
-                            <h2 className='text-3xl font-bold text-gray-800'>
+                            <h2 className='text-3xl font-bold text-gray-800 dark:text-gray-200'>
                                 Invite People to your Workspace
                             </h2>
-                            <p className='text-gray-600 mt-2'>
+                            <p className='text-gray-600 mt-2 dark:text-gray-400'>
                                 Share the invite link with your team members.
                             </p>
                         </div>
@@ -123,7 +126,8 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                         <div className='space-y-4'>
                             <button
                                 className='bg-customBlue text-white px-6 py-3 rounded-lg hover:bg-blue-700
-                    transition-colors flex items-center justify-center gap-2 w-full'
+                    transition-colors flex items-center justify-center gap-2 w-full
+                    dark:bg-customYellow dark:text-gray-700 dark:hover:bg-yellow-500'
                                 onClick={handleGenerateLink}>
                                 <Link size={20} />
                                 Generate Invite Link
@@ -135,13 +139,14 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                                         type='text'
                                         value={inviteLink}
                                         readOnly
-                                        className='flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50'
+                                        className='flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50
+                                        dark:bg-gray-200'
                                     />
 
                                     <button
                                         onClick={handleCopyLink}
                                         className='px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50
-                            transition-colors flex items-center gap-2'
+                            transition-colors flex items-center gap-2 dark:text-gray-100 dark:hover:bg-[#242424] dark:hover:text-customYellow'
                                     >
                                         <Copy size={18} />
                                         Copy
@@ -154,7 +159,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                             <button
                                 onClick={handleSubmit}
                                 className='bg-customBlue text-white px-6 py-2 rounded-lg hover:bg-blue-700
-                    transition-colors'
+                    transition-colors dark:bg-customYellow dark:text-gray-700 dark:hover:bg-yellow-500'
                             >
                                 Done
                             </button>

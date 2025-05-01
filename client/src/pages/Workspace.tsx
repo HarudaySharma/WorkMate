@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, } from 'react'
 import logo from '../assets/logoWMnew-Photoroom.png'
-import { Bolt, CalendarCheck2, Home, Info, MessageCircleMore, Plus, Search, User } from 'lucide-react'
+import { Bolt, CalendarCheck2, HomeIcon, Info, MessageCircleMore, Plus, Search, User } from 'lucide-react'
 import Chat from '../components/Workspace/Chat/Chat';
 import UserProfile from '../components/UserProfile';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CreateWorkspaceModal from '../components/Workspace/CreateWorkspaceModal';
 import toast from 'react-hot-toast';
 import WorkSpaceInfo from '../components/Workspace/WorkSpaceInfo';
+import Home from './Home';
 
 const Workspace = () => {
 
@@ -15,6 +16,8 @@ const Workspace = () => {
     const [isWorkspaceOpen, setIsWorkpaceOpen] = useState(false);
     const [activeTab, setIsActiveTab] = useState('home');
     const [newWorkSpace, setNewWorkSpace] = useState(false);
+
+    const navigate  = useNavigate();
 
     // Mock workspace data - replace with actual data later
     const workspaces = [
@@ -32,12 +35,18 @@ const Workspace = () => {
         return <></>
     }
 
+    const goToHome = () => {
+        navigate('/');
+    }
+
     return (
-        <div className='h-screen flex pt-2'>
+        <div className='h-screen flex pt-2 dark:bg-[#242424]'>
             {/* Left Sidebar */}
-            <div className='w-16 bg-white flex flex-col items-center '>
+            <div className='w-16 bg-white flex flex-col items-center dark:bg-[#242424]'>
                 {/* Logo */}
-                <div className='py-4'>
+                <div
+                onClick={goToHome} 
+                className='py-4 cursor-pointer'>
                     <img
                         src={logo}
                         alt='WorkMate'
@@ -93,65 +102,72 @@ const Workspace = () => {
                 </div>
 
                 {/* Navigation Items */}
-                <div className='flex flex-col space-y-6 mt-12'>
+                <div className='flex flex-col space-y-6 mt-12 '>
 
                     <button
                         onClick={() => setIsActiveTab('home')}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors
-                ${activeTab === 'home' ? 'bg-gray-100' : ''}`}
+                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
+                ${activeTab === 'home' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
                     >
-                        <Home size={24} />
+                        <HomeIcon size={24} />
                     </button>
 
                     <button
                         onClick={() => setIsActiveTab('chat')}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors
-                ${activeTab === 'chat' ? 'bg-gray-100' : ''}`}>
+                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
+                ${activeTab === 'chat' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>
                         <MessageCircleMore size={24} />
                     </button>
 
                     <button
                         onClick={() => setIsActiveTab('calendar')}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors
-                ${activeTab === 'calendar' ? 'bg-gray-100' : ''}`}>
+                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
+                ${activeTab === 'calendar' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>
                         <CalendarCheck2 size={24} />
                     </button>
 
                     <button
                         onClick={() => setIsActiveTab('info')}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors
-                ${activeTab === 'info' ? 'bg-gray-100' : ''}`}>
+                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
+                ${activeTab === 'info' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>
                         <Info size={24} />
                     </button>
 
-                    <button className="w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors mt-64">
-                        <Bolt size={24} />
+                    <button className={`w-10 h-10 rounded-lg flex items-center justify-center
+                text-gray-600 hover:bg-gray-100 transition-colors mt-64
+                dark:text-gray-300 dark:hover:bg-gray-500
+                ${activeTab === 'settings' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>                        <Bolt size={24} />
                     </button>
                 </div>
             </div>
 
             {/* Main Cntent Area */}
-            <div className='flex-1'>
+            <div className='flex-1 '>
                 {/* Top Navigation Bar */}
-                <div className='h-16 bg-white px-4 flex items-center justify-between'>
+                <div className='h-16 bg-white px-4 flex items-center justify-between dark:bg-[#242424]'>
                     {/* Title */}
-                    <span className='text-3xl font-semibold text-gray-800 -ml-3'>WorkMate</span>
+                    <span
+                    onClick={goToHome} 
+                    className='text-3xl font-semibold text-gray-800 -ml-3 cursor-pointer dark:text-gray-100'>WorkMate</span>
 
                     {/* Search Bar */}
                     <div className='flex-1 max-w-2xl mx-8'>
                         <div className='relative'>
-                            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'
+                            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-customBlue dark:text-customYellow'
                                 size={20}
                             />
                             <input
                                 type='text'
                                 placeholder='Search...'
-                                className='w-full pl-10 pr-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-customBlue' />
+                                className='w-full pl-10 pr-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:border-customBlue dark:text-gray-100 dark:focus:border-customYellow' />
                         </div>
                     </div>
 
@@ -180,7 +196,7 @@ const Workspace = () => {
                         ) : activeTab === 'info' ?(
                             <WorkSpaceInfo/>
                         ) : (
-                            <div className='flex items-center justify-center h-full text-gray-500'>
+                            <div className='flex items-center justify-center h-full text-gray-500 dark:text-gray-100'>
                                 Select Tab to view content.
                             </div>
                         )}
