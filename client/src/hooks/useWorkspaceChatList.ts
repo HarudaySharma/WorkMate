@@ -9,7 +9,7 @@ export interface UseWorkpaceChatListParams {
 
 const useWorkspaceChatList = ({ workspaceId }: UseWorkpaceChatListParams) => {
     return useQuery({
-        queryKey: ["workspace-members-list", "-" + workspaceId],
+        queryKey: ["workspace-chat-list", "-" + workspaceId],
         queryFn: async () => {
             const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}/all`, {
                 method: "GET",

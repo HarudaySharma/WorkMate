@@ -70,10 +70,11 @@ class Workmate {
 
             // check if the user is member of chat
             const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
-            const chatMbr = await chatMembersRepo.find({ chat_id: chatId, user_id: userId })
-            if (chatMbr === null) {
-                throw new WorkmateError('USER_ERROR', `user is not a member of chat`, StatusCodes.UNAUTHORIZED);
-            }
+            // NOTE:
+            // const chatMbr = await chatMembersRepo.find({ chat_id: chatId, user_id: userId })
+            // if (chatMbr === null) {
+            //     throw new WorkmateError('USER_ERROR', `user is not a member of chat`, StatusCodes.UNAUTHORIZED);
+            // }
 
             // retrieve all the members of the chat
             const chatMbrs = await chatMembersRepo.findByChatId({ chat_id: chatId })
@@ -262,15 +263,18 @@ class Workmate {
                 chatId = id;
 
                 await chatMembersRepo.add({
-                    user_id: recieverId,
-                    chat_id: chatId,
-                    role: 'admin', // user should also be the admin
-                });
-                await chatMembersRepo.add({
                     user_id: userId,
                     chat_id: chatId,
                     role: 'admin', // reciever should also be the admin
                 });
+
+                if (recieverId !== userId) {
+                    await chatMembersRepo.add({
+                        user_id: recieverId,
+                        chat_id: chatId,
+                        role: 'admin', // user should also be the admin
+                    });
+                }
             }
 
             if (!chatId) {

@@ -1,42 +1,56 @@
-import React, { useEffect, useState } from 'react'
+import React, { } from 'react'
 import useChatContext from '../../../hooks/useChatContext';
 import toast from 'react-hot-toast';
 import createChat from '../../../utils/createChat';
-import { Chat, ErrorFormat, WorkspaceMemberReturn } from '../../../types';
+import { ErrorFormat, WorkspaceMemberReturn } from '../../../types';
 import useWorkspaceMembersList from '../../../hooks/useWorkspaceMembersList';
 import Loader from '../../Loader';
+import useAuth from '../../../hooks/useAuth';
 
 interface NewDirectMessageProp {
     onClose: () => void;
-    existingMemberChats: Chat[];
 }
 
-// mock members
-const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose, existingMemberChats}) => {
+const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose }) => {
+    const {
+        workspace: { id: workspaceId },
+        oneOneChatRecievers,
+        chats,
+        refetchChatList,
+        setSelectedChat
+    } = useChatContext()
 
-    const { workspace: { id: workspaceId }, refetchChatList, setSelectedChat } = useChatContext()
-
-    const { data: members, isFetching } = useWorkspaceMembersList({
+    const { data: wkspcMembers, isFetching } = useWorkspaceMembersList({
         workspaceId,
     })
 
-    const [shownMembers, setShownMembers] = useState<WorkspaceMemberReturn[]>([])
+    const { user } = useAuth();
 
-
-    // Temporary fix
-    useEffect(() => {
-        if (members) {
-            const alreadyPresent = new Set();
-            existingMemberChats.forEach(chat => alreadyPresent.add(chat.name))// chat name will be the recievers username
-            setShownMembers(members.filter(mbr => alreadyPresent.has(mbr.username)))
-        }
-    }, [members])
-
+    // members will have id right ?
     const handleSelect = async (member: WorkspaceMemberReturn) => {
         // add to direct messages
+        if (!chats) {
+            toast.error("chat list is not there")
+            return;
+        }
         if (!workspaceId) {
             toast.error("something's wrong, missing workspaceId")
             return;
+        }
+
+        // check if the chat b/w the user and the workpace member they have selected is existing
+        for (const chatId in oneOneChatRecievers) {
+            const reciever = oneOneChatRecievers[chatId]
+            if (reciever?.id === member.id) {
+                const chat = chats.find(chat => chat?.id === +chatId)
+                if (!chat) {
+                    toast.error("chat exist already but not found in chats array")
+                    return;
+                }
+                setSelectedChat(chat);
+                onClose()
+                return;
+            }
         }
 
         try {
@@ -51,8 +65,9 @@ const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose, existingMem
             refetchChatList()
         } catch (err) {
             toast.error((err as ErrorFormat).message)
+        } finally {
+            onClose();
         }
-        onClose();
     };
 
     return (
@@ -67,14 +82,17 @@ const NewDirectMessage: React.FC<NewDirectMessageProp> = ({ onClose, existingMem
                 <h2 className='text-2xl font-bold mb-4'>New Direct Message</h2>
                 <div className='space-y-4 max-h-80 overflow-y-auto'>
                     {isFetching && <Loader height={'12'} width={'12'} />}
-                    {shownMembers?.map((member) => (
+                    {wkspcMembers?.map((mbr) => (
                         <div
-                            key={member.id}
-                            onClick={() => handleSelect(member)}
+                            key={`${mbr.id} + ${mbr.username}`}
+                            onClick={() => handleSelect(mbr)}
                             className='flex items-center gap-4 p-2 rounded-lg border-none outline-2 outline-gray-200 hover:bg-gray-100 cursor-pointer'
                         >
-                            <img src={member.profile_picture} alt={member.name || member.username} className='w-8 h-8 rounded-full' />
-                            <span className='text-gray-700'>{member.username}</span>
+                            <img src={mbr.profile_picture} alt={mbr.name || mbr.username} className='w-8 h-8 rounded-full' />
+                            <span className='text-gray-700'>
+                                {mbr.username}
+                                {mbr.username === user?.username && " (You)"}
+                            </span>
                         </div>
                     ))}
                 </div>

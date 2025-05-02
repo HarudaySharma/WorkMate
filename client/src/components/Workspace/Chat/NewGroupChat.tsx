@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { ErrorFormat } from '../../../types'
 import createChat from '../../../utils/createChat'
-import { useParams } from 'react-router-dom'
 import useChatContext from '../../../hooks/useChatContext'
 
 interface NewGroupChatProp {
@@ -10,9 +9,7 @@ interface NewGroupChatProp {
 }
 
 const NewGroupChat: React.FC<NewGroupChatProp> = ({ onClose }) => {
-    const {setSelectedChat, refetchChatList} = useChatContext();
-
-    const {workspaceId} = useParams()
+    const {setSelectedChat, refetchChatList, workspace: {id: workspaceId}} = useChatContext();
 
     const [groupName, setGroupName] = useState('')
 

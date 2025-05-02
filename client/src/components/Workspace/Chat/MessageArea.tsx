@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useChatContext from "../../../hooks/useChatContext";
 import { Send } from "lucide-react";
+import useAuth from "../../../hooks/useAuth";
 
 interface Message {
     id: number;
@@ -11,7 +12,8 @@ interface Message {
 }
 
 function MessageArea() {
-    const { selectedChat } = useChatContext()
+    const {user} = useAuth();
+    const { selectedChat, oneOneChatRecievers } = useChatContext()
 
     const messages: Message[] = [
         {
@@ -53,9 +55,23 @@ function MessageArea() {
             {/* the state here should be changed dynamically*/}
 
             {/* Chat header */}
-            < div className="h-16 border-b border-gray-200 px-6 flex items-center" >
-                <h2 className="text-xl font-semibold text-gray-800">{selectedChat.name}</h2>
-            </div >
+            {selectedChat.type === 'group' ?
+                < div className="h-16 border-b border-gray-200 px-6 flex items-center" >
+                    <h2 className="text-xl font-semibold text-gray-800">{selectedChat.name}</h2>
+                </div >
+                :
+                < div className="relative h-16 border-b border-gray-200 px-6 flex items-center" >
+                    <img
+                        src={oneOneChatRecievers[selectedChat.id]?.profile_picture}
+                        alt={oneOneChatRecievers[selectedChat.id]?.username}
+                        className='w-6 h-6 rounded-full'
+                    />
+                    <h2 className="text-xl font-semibold text-gray-800">
+                        {oneOneChatRecievers[selectedChat.id]?.name || oneOneChatRecievers[selectedChat.id]?.username}
+                        {user?.username === oneOneChatRecievers[selectedChat.id].name && " (You)"}
+                    </h2>
+                </div >
+            }
 
             {/* Messages Area */}
             < div className='flex-1 overflow-y-auto p-6 space-y-6' >
