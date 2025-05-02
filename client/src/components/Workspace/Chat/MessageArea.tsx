@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useChatContext from "../../../hooks/useChatContext";
 import { Send } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
+import { Chat, CreateMessageEventParams, GetMessagesEventParams, JoinChatEventParams, LeaveChatEventParams, MessageReturn } from "../../../types";
+import { socket } from "../../../socket";
+import { useSocket } from "../../../hooks/useSocket";
 
 interface Message {
     id: number;
@@ -11,41 +14,122 @@ interface Message {
     avatar: string;
 }
 
-function MessageArea() {
-    const {user} = useAuth();
-    const { selectedChat, oneOneChatRecievers } = useChatContext()
+const messages: Message[] = [
+    {
+        id: 1,
+        text: "Hey team! How's the progress on the new feature?",
+        sender: 'other',
+        timestamp: '10:30 AM',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100',
+    },
+    {
+        id: 2,
+        text: "We're making good progress! The core functionality is almost complete.",
+        sender: 'user',
+        timestamp: '10:32 AM',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100',
+    },
+];
 
-    const messages: Message[] = [
-        {
-            id: 1,
-            text: "Hey team! How's the progress on the new feature?",
-            sender: 'other',
-            timestamp: '10:30 AM',
-            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100',
-        },
-        {
-            id: 2,
-            text: "We're making good progress! The core functionality is almost complete.",
-            sender: 'user',
-            timestamp: '10:32 AM',
-            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100',
-        },
-    ];
+function MessageArea() {
+    const { user } = useAuth();
+    const {
+        workspace: { id: workspaceId },
+        oneOneChatRecievers,
+        selectedChat,
+        socket,
+        socketConnected,
+    } = useChatContext()
 
     const [newMessage, setNewMessage] = useState('');
+
+    const [messages, setMessages] = useState<MessageReturn[]>([])
+
 
     //Mock data for Channels and Direct Messages
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (newMessage.trim()) {
-            //Add Message Handling Logic Here
-            setNewMessage('');
+
+        if (!newMessage.trim() || !selectedChat || !socketConnected) {
+            return
         }
+
+        const createMessage = () => {
+            console.log("creating a new message....")
+            socket.emit("create-message", {
+                "workspaceId": workspaceId,
+                "chatId": selectedChat.id,
+                message: {
+                    type: 'text',
+                    text: newMessage,
+                },
+            } as CreateMessageEventParams);
+        }
+
+        createMessage()
     };
+
+    useEffect(() => {
+        setMessages([])
+
+        if (!socketConnected || !selectedChat) {
+            return
+        }
+
+
+        // join the chat room
+        const joinChat = () => {
+            console.log(`joining the chat: ${selectedChat.name}, id: ${selectedChat.id}`)
+            socket.emit("join-chat", {
+                "workspaceId": workspaceId,
+                "chatId": selectedChat.id,
+            } as JoinChatEventParams);
+        }
+
+        // fetch messages
+        const fetchMessages = () => {
+            socket.emit("get-messages", {
+                "workspaceId": workspaceId,
+                "chatId": selectedChat.id,
+                "offset": 0,
+                "limit": 0,
+            } as GetMessagesEventParams);
+
+        }
+
+
+        joinChat();
+        fetchMessages()
+
+        socket.on("chat-messages", (msgs: MessageReturn[]) => {
+            setMessages(msgs)
+
+            console.log("chat messages: ", msgs)
+        })
+
+        socket.on("new-message", (msg: MessageReturn) => {
+            console.log("new message recieved")
+            console.log(msg)
+
+            setMessages([...messages, msg])
+        })
+
+
+        return () => {
+            // leave the chat room
+            console.log("leaving chat room")
+            socket.emit("leave-chat", {
+                workspaceId: workspaceId,
+                chatId: selectedChat.id,
+            } as LeaveChatEventParams)
+        }
+
+    }, [selectedChat])
+
 
 
     if (!selectedChat) {
-        return <></>;
+        return <></>
     }
 
     return (
@@ -78,23 +162,23 @@ function MessageArea() {
                 {
                     messages.map((message) => (
                         <div
-                            key={message.id}
-                            className={`flex items-start gap-4 ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}
+                            key={message.message_id}
+                            className={`flex items-start gap-4 ${message.sender_id === user?.id ? 'flex-row-reverse' : ''}`}
                         >
                             <img
-                                src={message.avatar}
+                                src={message.sender_id !== user?.id ? undefined : user.profile_picture}
                                 alt='Avatar'
                                 className='w-10 h-10 rounded-full'
                             />
 
-                            <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : ''}`}>
-                                <div className={`px-4 py-2  rounded-lg max-w-xl ${message.sender === 'user'
+                            <div className={`flex flex-col ${message.sender_id === user?.id ? 'items-end' : ''}`}>
+                                <div className={`px-4 py-2  rounded-lg max-w-xl ${message.sender_id === user?.id
                                     ? 'bg-customBlue text-white'
                                     : 'bg-gray-200'
                                     }`}>
                                     {message.text}
                                 </div>
-                                <span className='text-sm text-gray-500 mt-1'>{message.timestamp}</span>
+                                <span className='text-sm text-gray-500 mt-1'>{new Date(message.created_at).getUTCSeconds()}</span>
                             </div>
                         </div>
                     ))

@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { Chat, ChatMemberReturn } from "../types";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
+import { Socket } from "socket.io-client";
 
 export type ChatRecieverState = {
     [chatId: number]: ChatMemberReturn;
@@ -22,6 +23,8 @@ export interface ChatContextType {
     setShowNewGroup: React.Dispatch<React.SetStateAction<boolean>>;
     setShowNewDirect: React.Dispatch<React.SetStateAction<boolean>>;
 
+    socket: Socket;
+    socketConnected: boolean;
 }
 
 export const ChatContext = createContext<ChatContextType | null>(null)

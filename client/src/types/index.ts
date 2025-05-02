@@ -47,6 +47,24 @@ export type ChatMember = {
     role: 'admin' | 'member',
 }
 
+export type Message = {
+    message_id: string, // UUID
+    sender_id: number, // Foreign Key (User.id)
+    chat_id: number // Foreign Key (Chat.id)
+
+    type: "text" | "image" | "audio",
+    text: string | null,
+    image_url: string | null, // url to the image
+    audio_url: string | null, // url to the audio file
+    created_at: Date,
+    is_deleted: 0 | 1;
+    // optional:
+    // isUpdated: boolean
+}
+
+
+export type MessageReturn = Omit<Message, "is_deleted">;
+
 export interface ChatMemberReturn extends Pick<User, "name" | "username" | "email" | "profile_picture" | "id">, Pick<ChatMember, "role" | "joined_at"> { };
 
 
@@ -56,9 +74,35 @@ export type WorkspaceMember = {
     role: 'admin' | 'member',
 }
 
-export interface WorkspaceMemberReturn extends Pick<WorkspaceMember, "role">, Pick<User, "id" | "username" | "name" | "email" | "profile_picture"> {}
+export interface WorkspaceMemberReturn extends Pick<WorkspaceMember, "role">, Pick<User, "id" | "username" | "name" | "email" | "profile_picture"> { }
 
 export type WorkSpaceOmitInviteLink = Omit<WorkSpace, 'invite_link'>;
 
 export type AuthProvider = "google" | "github" | "facebook";
+
+
+
+// socket types
+export interface GetMessagesEventParams {
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
+    offset: number;
+    limit: number;
+}
+
+export interface CreateMessageEventParams {
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
+    message: Pick<Message, "type" | "text" | "image_url" | "audio_url">;
+}
+
+export interface JoinChatEventParams {
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
+}
+
+export interface LeaveChatEventParams {
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
+}
 

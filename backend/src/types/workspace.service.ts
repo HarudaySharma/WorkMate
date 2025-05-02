@@ -192,6 +192,13 @@ export interface DeleteChatMessageRet extends WorkmateReturnObj { }
 
 // SOCKETTTTTTTTTS
 
+export interface GetMessagesEventParams {
+    workspaceId: WorkSpace["id"];
+    chatId: Chat["id"];
+    offset: number;
+    limit: number;
+}
+
 export interface CreateMessageEventParams {
     workspaceId: WorkSpace["id"];
     chatId: Chat["id"];

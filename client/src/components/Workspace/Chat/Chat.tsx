@@ -9,20 +9,22 @@ import { Chat as ChatType } from '../../../types';
 import toast from 'react-hot-toast';
 import NewDirectMessage from './NewDirectMessage';
 import NewGroupChat from './NewGroupChat';
+import { useSocket } from '../../../hooks/useSocket';
 
 interface ChatProps {
     workspaceId: number;
 }
 
 const Chat = ({ workspaceId }: ChatProps) => {
-
-    const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);
-    const { data: chats, refetch, isFetching, error } = useWorkspaceChatList({ workspaceId: workspaceId });
-
     const [showNewGroup, setShowNewGroup] = useState(false);
     const [showNewDirect, setShowNewDirect] = useState(false);
 
+    const { data: chats, refetch, isFetching, error } = useWorkspaceChatList({ workspaceId: workspaceId });
+    const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);
+
     const [oneOneChatRecievers, setOneOneChatRecievers] = useState<ChatRecieverState>({})
+
+    const { socket, connected: socketConnected } = useSocket()
 
     useEffect(() => {
         console.log(selectedChat)
@@ -41,6 +43,9 @@ const Chat = ({ workspaceId }: ChatProps) => {
         setSelectedChat,
         setShowNewDirect,
         setShowNewGroup,
+
+        socket,
+        socketConnected,
     }
 
     if (error) {
@@ -71,7 +76,7 @@ const Chat = ({ workspaceId }: ChatProps) => {
 
                 </div>
 
-                <MessageArea />
+                {selectedChat && <MessageArea />}
 
                 {showNewGroup && <NewGroupChat onClose={() => setShowNewGroup(false)} />}
                 {showNewDirect &&

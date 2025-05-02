@@ -8,7 +8,8 @@ import { JWTPayload } from "./types"
 import generateRoomId from "./utils/generateRoomId"
 import Workmate from "./services/workmate/workmate.service"
 import db from "./services/mqsql/mysql.service"
-import { CreateMessageEventParams, JoinChatEventParams, LeaveChatEventParams } from "./types/workspace.service"
+import { CreateMessageEventParams, GetMessagesEventParams, JoinChatEventParams, LeaveChatEventParams } from "./types/workspace.service"
+import { P } from "pino"
 
 const server = http.createServer()
 
@@ -31,6 +32,26 @@ io.use(wsVerifyToken)
 io.on('connection', (socket) => {
     // connection to be established when user opens the chat section.
     logger.info(`connected to id:${socket.id}`)
+
+    socket.on("get-messages", async({ chatId, workspaceId, offset, limit }: GetMessagesEventParams) => {
+        if (!workspaceId && !chatId) {
+            socket._error(new Error("please send workspace id an chat id"))
+            return
+        }
+
+        const { user } = socket.data as { user: JWTPayload["data"]["user"] };
+
+        // get all the messages
+        const workmate = new Workmate(db);
+        const ret = await workmate.getChatMessages({
+            userId: user.id,
+            workspaceId: workspaceId,
+            chatId: chatId,
+        })
+
+        const roomId = generateRoomId(workspaceId, chatId)
+        io.to(roomId).emit("chat-messages", ret.data.messages)
+    })
 
     socket.on("create-message", async({ message, chatId, workspaceId }: CreateMessageEventParams) => {
         if (!workspaceId && !chatId) {

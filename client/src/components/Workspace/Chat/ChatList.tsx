@@ -27,7 +27,6 @@ function ChatList({ className }: ChatListParams) {
                     </button>
                 </div>
 
-
                 {/* Groups List */}
                 <GroupsList />
 
