@@ -1,35 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useChatContext from "../../../hooks/useChatContext";
 import { Send } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
-import { Chat, CreateMessageEventParams, GetMessagesEventParams, JoinChatEventParams, LeaveChatEventParams, MessageReturn } from "../../../types";
-import { socket } from "../../../socket";
-import { useSocket } from "../../../hooks/useSocket";
+import { ChatMemberReturn, CreateMessageEventParams, GetMessagesEventParams, JoinChatEventParams, LeaveChatEventParams, MessageReturn } from "../../../types";
 
-interface Message {
-    id: number;
-    text: string;
-    sender: 'user' | 'other';
-    timestamp: string;
-    avatar: string;
-}
-
-const messages: Message[] = [
-    {
-        id: 1,
-        text: "Hey team! How's the progress on the new feature?",
-        sender: 'other',
-        timestamp: '10:30 AM',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100',
-    },
-    {
-        id: 2,
-        text: "We're making good progress! The core functionality is almost complete.",
-        sender: 'user',
-        timestamp: '10:32 AM',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100',
-    },
-];
+export type chatMemberMapState = {
+    [memberId: number]: ChatMemberReturn;
+};
 
 function MessageArea() {
     const { user } = useAuth();
@@ -37,6 +14,7 @@ function MessageArea() {
         workspace: { id: workspaceId },
         oneOneChatRecievers,
         selectedChat,
+        selectedChatMembers,
         socket,
         socketConnected,
     } = useChatContext()
@@ -45,8 +23,11 @@ function MessageArea() {
 
     const [messages, setMessages] = useState<MessageReturn[]>([])
 
+    const hasJoinedRef = useRef(false)
+    const [chatMembersMap, setChatMembersMap] = useState<chatMemberMapState>({})
 
-    //Mock data for Channels and Direct Messages
+    const bottomRef = useRef<HTMLDivElement>(null);
+
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -64,27 +45,49 @@ function MessageArea() {
                     text: newMessage,
                 },
             } as CreateMessageEventParams);
+
         }
 
         createMessage()
+        setNewMessage("")
     };
+
+    useEffect(() => {
+        if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
+
+    useEffect(() => {
+        if (!selectedChatMembers) {
+            return;
+        }
+
+        const map: chatMemberMapState = {};
+        selectedChatMembers.forEach(member => {
+            map[member.id] = member;
+        });
+        setChatMembersMap(map);
+
+    }, [selectedChatMembers])
 
     useEffect(() => {
         setMessages([])
 
-        if (!socketConnected || !selectedChat) {
+        console.log({ hasJoined: hasJoinedRef.current })
+        if (!socketConnected || !selectedChat || hasJoinedRef.current) {
             return
         }
 
+        const handleChatMessages = (msgs: MessageReturn[]) => {
+            console.log("chat messages: ", msgs);
+            setMessages(msgs);
+        };
 
-        // join the chat room
-        const joinChat = () => {
-            console.log(`joining the chat: ${selectedChat.name}, id: ${selectedChat.id}`)
-            socket.emit("join-chat", {
-                "workspaceId": workspaceId,
-                "chatId": selectedChat.id,
-            } as JoinChatEventParams);
-        }
+        const handleNewMessage = (msg: MessageReturn) => {
+            console.log("new message received", msg);
+            setMessages((prevMessages) => [...prevMessages, msg]);
+        };
 
         // fetch messages
         const fetchMessages = () => {
@@ -94,26 +97,24 @@ function MessageArea() {
                 "offset": 0,
                 "limit": 0,
             } as GetMessagesEventParams);
-
         }
 
+        // join the chat room
+        const joinChat = () => {
+            console.log(`joining the chat: ${selectedChat.name}, id: ${selectedChat.id}`)
+            socket.emit("join-chat", {
+                "workspaceId": workspaceId,
+                "chatId": selectedChat.id,
+            } as JoinChatEventParams);
+
+            hasJoinedRef.current = true;
+            fetchMessages()
+        }
+
+        socket.on("chat-messages", handleChatMessages)
+        socket.on("new-message", handleNewMessage)
 
         joinChat();
-        fetchMessages()
-
-        socket.on("chat-messages", (msgs: MessageReturn[]) => {
-            setMessages(msgs)
-
-            console.log("chat messages: ", msgs)
-        })
-
-        socket.on("new-message", (msg: MessageReturn) => {
-            console.log("new message recieved")
-            console.log(msg)
-
-            setMessages([...messages, msg])
-        })
-
 
         return () => {
             // leave the chat room
@@ -122,9 +123,14 @@ function MessageArea() {
                 workspaceId: workspaceId,
                 chatId: selectedChat.id,
             } as LeaveChatEventParams)
+
+            hasJoinedRef.current = false;
+            socket.off("chat-messages", handleChatMessages);
+            socket.off("new-message", handleNewMessage);
+
         }
 
-    }, [selectedChat])
+    }, [selectedChat, socketConnected])
 
 
 
@@ -158,33 +164,37 @@ function MessageArea() {
             }
 
             {/* Messages Area */}
-            < div className='flex-1 overflow-y-auto p-6 space-y-6' >
-                {
-                    messages.map((message) => (
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {messages
+                    .slice()
+                    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) // oldest to newest
+                    .map((message) => (
                         <div
                             key={message.message_id}
                             className={`flex items-start gap-4 ${message.sender_id === user?.id ? 'flex-row-reverse' : ''}`}
                         >
                             <img
-                                src={message.sender_id !== user?.id ? undefined : user.profile_picture}
-                                alt='Avatar'
-                                className='w-10 h-10 rounded-full'
+                                src={message.sender_id !== user?.id ? chatMembersMap[message.sender_id]?.profile_picture : user.profile_picture}
+                                alt="Avatar"
+                                className="w-10 h-10 rounded-full"
                             />
-
                             <div className={`flex flex-col ${message.sender_id === user?.id ? 'items-end' : ''}`}>
-                                <div className={`px-4 py-2  rounded-lg max-w-xl ${message.sender_id === user?.id
-                                    ? 'bg-customBlue text-white'
-                                    : 'bg-gray-200'
-                                    }`}>
+                                <div
+                                    className={`px-4 py-2 rounded-lg max-w-xl ${message.sender_id === user?.id
+                                        ? 'bg-customBlue text-white'
+                                        : 'bg-gray-200'
+                                        }`}
+                                >
                                     {message.text}
                                 </div>
-                                <span className='text-sm text-gray-500 mt-1'>{new Date(message.created_at).getUTCSeconds()}</span>
+                                <span className="text-sm text-gray-500 mt-1">
+                                    {new Date(message.created_at).toLocaleTimeString()}
+                                </span>
                             </div>
                         </div>
-                    ))
-                }
-            </div >
-
+                    ))}
+                <div ref={bottomRef} />
+            </div>
             {/* Message Input */}
             < form
                 onSubmit={handleSendMessage}

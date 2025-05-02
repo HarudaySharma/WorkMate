@@ -9,7 +9,6 @@ import generateRoomId from "./utils/generateRoomId"
 import Workmate from "./services/workmate/workmate.service"
 import db from "./services/mqsql/mysql.service"
 import { CreateMessageEventParams, GetMessagesEventParams, JoinChatEventParams, LeaveChatEventParams } from "./types/workspace.service"
-import { P } from "pino"
 
 const server = http.createServer()
 
@@ -33,7 +32,7 @@ io.on('connection', (socket) => {
     // connection to be established when user opens the chat section.
     logger.info(`connected to id:${socket.id}`)
 
-    socket.on("get-messages", async({ chatId, workspaceId, offset, limit }: GetMessagesEventParams) => {
+    socket.on("get-messages", async ({ chatId, workspaceId, offset, limit }: GetMessagesEventParams) => {
         if (!workspaceId && !chatId) {
             socket._error(new Error("please send workspace id an chat id"))
             return
@@ -42,18 +41,23 @@ io.on('connection', (socket) => {
         const { user } = socket.data as { user: JWTPayload["data"]["user"] };
 
         // get all the messages
-        const workmate = new Workmate(db);
-        const ret = await workmate.getChatMessages({
-            userId: user.id,
-            workspaceId: workspaceId,
-            chatId: chatId,
-        })
+        try {
+            const workmate = new Workmate(db);
+            const ret = await workmate.getChatMessages({
+                userId: user.id,
+                workspaceId: workspaceId,
+                chatId: chatId,
+            })
 
-        const roomId = generateRoomId(workspaceId, chatId)
-        io.to(roomId).emit("chat-messages", ret.data.messages)
+            const roomId = generateRoomId(workspaceId, chatId)
+            io.to(roomId).emit("chat-messages", ret.data.messages)
+        } catch (err) {
+            console.error("get-messages error:", err);
+            socket._error(new Error("Failed to get messages"))
+        }
     })
 
-    socket.on("create-message", async({ message, chatId, workspaceId }: CreateMessageEventParams) => {
+    socket.on("create-message", async ({ message, chatId, workspaceId }: CreateMessageEventParams) => {
         if (!workspaceId && !chatId) {
             socket._error(new Error("please send workspace id an chat id"))
             return
@@ -61,28 +65,34 @@ io.on('connection', (socket) => {
 
         const { user } = socket.data as { user: JWTPayload["data"]["user"] };
 
-        // save the msg to the db and broadcast the message to all the chat room
-        const workmate = new Workmate(db);
-        const ret = await workmate.createMessage({
-            userId: user.id,
-            chat: {
-                id: chatId,
-                workspace_id: workspaceId,
-            },
-            msg: {
-                type: message.type,
-                text: message.text || null,
-                audio_url: message.audio_url || null,
-                image_url: message.image_url || null,
-            }
-        })
+        try {
+            // save the msg to the db and broadcast the message to all the chat room
+            const workmate = new Workmate(db);
+            const ret = await workmate.createMessage({
+                userId: user.id,
+                chat: {
+                    id: chatId,
+                    workspace_id: workspaceId,
+                },
+                msg: {
+                    type: message.type,
+                    text: message.text || null,
+                    audio_url: message.audio_url || null,
+                    image_url: message.image_url || null,
+                }
+            })
 
-        const roomId = generateRoomId(workspaceId, chatId)
-        io.to(roomId).emit("new-message", ret)
+            const roomId = generateRoomId(workspaceId, chatId)
+            io.to(roomId).emit("new-message", ret.data.message)
+        }
+        catch (err) {
+            console.error("create-message error:", err);
+            socket._error(new Error("Failed to get messages"))
+        }
 
     })
 
-    socket.on("join-chat", ({workspaceId, chatId}: JoinChatEventParams) => {
+    socket.on("join-chat", ({ workspaceId, chatId }: JoinChatEventParams) => {
         // NOTE: check if the user is already present in any chat
         // HACK: to avoid doing this expensive task, just make sure that client is leaving there previous chat room before entering into new one.
 

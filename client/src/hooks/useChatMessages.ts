@@ -4,15 +4,15 @@ import { useQuery } from "@tanstack/react-query"
 
 
 export interface UseChatMessagesParams {
-    workspaceId: number;
-    chatId: number;
+    workspaceId: number | undefined;
+    chatId: number | undefined;
     offset?: number
     limit?: number
 }
 
 const useChatMessages = ({ workspaceId, chatId }: UseChatMessagesParams) => {
     return useQuery({
-        queryKey: ["chat" + "-" + chatId + "-" + "messages"],
+        queryKey: ["chat-messages", chatId, workspaceId],
         queryFn: async () => {
             const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}/${chatId}/messages`, {
                 method: "GET",
@@ -31,7 +31,8 @@ const useChatMessages = ({ workspaceId, chatId }: UseChatMessagesParams) => {
             const data = await resp.json()
 
             return data.data.messages as MessageReturn[];
-        }
+        },
+        enabled: !!chatId && !!workspaceId,
     })
 }
 

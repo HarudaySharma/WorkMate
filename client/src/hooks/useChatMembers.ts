@@ -1,17 +1,20 @@
 import env from "../zod"
-import { Chat, ErrorFormat } from "../types"
+import { ChatMemberReturn, ErrorFormat } from "../types"
 import { useQuery } from "@tanstack/react-query"
 
 
-export interface UseWorkpaceChatListParams {
+export interface UseChatMembersParams {
     workspaceId: number | undefined;
+    chatId: number | undefined;
+    offset?: number
+    limit?: number
 }
 
-const useWorkspaceChatList = ({ workspaceId }: UseWorkpaceChatListParams) => {
+const useChatMembers = ({ workspaceId, chatId }: UseChatMembersParams) => {
     return useQuery({
-        queryKey: ["workspace-chat-list", workspaceId],
+        queryKey: ["chat-members", chatId, workspaceId],
         queryFn: async () => {
-            const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}/all`, {
+            const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}/${chatId}/members`, {
                 method: "GET",
                 headers: {
                     'accept': 'application/json',
@@ -27,10 +30,10 @@ const useWorkspaceChatList = ({ workspaceId }: UseWorkpaceChatListParams) => {
             // refer to the workmate backend service return types for data structure
             const data = await resp.json()
 
-            return data.data.chats as Chat[];
+            return data.data.members as ChatMemberReturn[];
         },
-        enabled: !!workspaceId,
+        enabled: !!chatId && !!workspaceId, // <-- don't run unless both are defined
     })
 }
 
-export default useWorkspaceChatList
+export default useChatMembers

@@ -12,6 +12,7 @@ export interface ChatContextType {
         id: number;
     };
     chats: Chat[] | undefined;
+    selectedChatMembers: ChatMemberReturn[] | undefined;
     selectedChat: Chat | null;
     setSelectedChat: React.Dispatch<React.SetStateAction<Chat | null>>;
 

@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import NewDirectMessage from './NewDirectMessage';
 import NewGroupChat from './NewGroupChat';
 import { useSocket } from '../../../hooks/useSocket';
+import useChatMembers from '../../../hooks/useChatMembers';
 
 interface ChatProps {
     workspaceId: number;
@@ -21,26 +22,28 @@ const Chat = ({ workspaceId }: ChatProps) => {
 
     const { data: chats, refetch, isFetching, error } = useWorkspaceChatList({ workspaceId: workspaceId });
     const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);
+    const { data: selectedChatMembers } = useChatMembers({ chatId: selectedChat?.id, workspaceId })
 
-    const [oneOneChatRecievers, setOneOneChatRecievers] = useState<ChatRecieverState>({})
+    const [oneOneChatRecievers, setOneOneChatRecievers] = useState<ChatRecieverState>({}) // the direct message recievers whose already having a chat with the user
+
 
     const { socket, connected: socketConnected } = useSocket()
-
-    useEffect(() => {
-        console.log(selectedChat)
-    }, [selectedChat])
-
 
     const chatContextValue: ChatContextType = {
         workspace: {
             id: workspaceId,
         },
-        refetchChatList: refetch,
         oneOneChatRecievers,
         setOneOneChatRecievers,
+
         chats,
+        refetchChatList: refetch,
+
         selectedChat,
         setSelectedChat,
+
+        selectedChatMembers,
+
         setShowNewDirect,
         setShowNewGroup,
 
