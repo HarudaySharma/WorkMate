@@ -3,6 +3,7 @@ import useChatContext from "../../../hooks/useChatContext";
 import { Send } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
 import { ChatMemberReturn, CreateMessageEventParams, GetMessagesEventParams, JoinChatEventParams, LeaveChatEventParams, MessageReturn } from "../../../types";
+import JoinChatPopupButton from "./JoinChatButton";
 
 export type chatMemberMapState = {
     [memberId: number]: ChatMemberReturn;
@@ -25,6 +26,7 @@ function MessageArea() {
 
     const hasJoinedRef = useRef(false)
     const [chatMembersMap, setChatMembersMap] = useState<chatMemberMapState>({})
+    const [isChatMember, setIsChatMember] = useState(false)
 
     const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +65,15 @@ function MessageArea() {
             return;
         }
 
+        // check if the user is the member of this chat
+        console.log({ selectedChatMembers })
+        if (selectedChatMembers?.find(mbr => mbr.id === user?.id)) {
+            setIsChatMember(true)
+        } else {
+            setIsChatMember(false)
+        }
+
+        // create a map for ui
         const map: chatMemberMapState = {};
         selectedChatMembers.forEach(member => {
             map[member.id] = member;
@@ -74,8 +85,11 @@ function MessageArea() {
     useEffect(() => {
         setMessages([])
 
-        console.log({ hasJoined: hasJoinedRef.current })
         if (!socketConnected || !selectedChat || hasJoinedRef.current) {
+            return
+        }
+
+        if (!isChatMember) {
             return
         }
 
@@ -130,13 +144,19 @@ function MessageArea() {
 
         }
 
-    }, [selectedChat, socketConnected])
+    }, [selectedChat, socketConnected, isChatMember])
+
+
+    const onJoin = () => {
+        setIsChatMember(true)
+    }
 
 
 
     if (!selectedChat) {
         return <></>
     }
+
 
     return (
 
@@ -158,45 +178,51 @@ function MessageArea() {
                     />
                     <h2 className="text-xl font-semibold text-gray-800">
                         {oneOneChatRecievers[selectedChat.id]?.name || oneOneChatRecievers[selectedChat.id]?.username}
-                        {user?.username === oneOneChatRecievers[selectedChat.id].name && " (You)"}
+                        {user?.username === oneOneChatRecievers[selectedChat.id]?.name && " (You)"}
                     </h2>
                 </div >
             }
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {messages
-                    .slice()
-                    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) // oldest to newest
-                    .map((message) => (
-                        <div
-                            key={message.message_id}
-                            className={`flex items-start gap-4 ${message.sender_id === user?.id ? 'flex-row-reverse' : ''}`}
-                        >
-                            <img
-                                src={message.sender_id !== user?.id ? chatMembersMap[message.sender_id]?.profile_picture : user.profile_picture}
-                                alt="Avatar"
-                                className="w-10 h-10 rounded-full"
-                            />
-                            <div className={`flex flex-col ${message.sender_id === user?.id ? 'items-end' : ''}`}>
-                                <div
-                                    className={`px-4 py-2 rounded-lg max-w-xl ${message.sender_id === user?.id
-                                        ? 'bg-customBlue text-white'
-                                        : 'bg-gray-200'
-                                        }`}
-                                >
-                                    {message.text}
+                {isChatMember ?
+                    messages
+                        .slice()
+                        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) // oldest to newest
+                        .map((message) => (
+                            <div
+                                key={message.message_id}
+                                className={`flex items-start gap-4 ${message.sender_id === user?.id ? 'flex-row-reverse' : ''}`}
+                            >
+                                <img
+                                    src={message.sender_id !== user?.id ? chatMembersMap[message.sender_id]?.profile_picture : user.profile_picture}
+                                    alt="Avatar"
+                                    className="w-10 h-10 rounded-full"
+                                />
+                                <div className={`flex flex-col ${message.sender_id === user?.id ? 'items-end' : ''}`}>
+                                    <div
+                                        className={`px-4 py-2 rounded-lg max-w-xl ${message.sender_id === user?.id
+                                            ? 'bg-customBlue text-white'
+                                            : 'bg-gray-200'
+                                            }`}
+                                    >
+                                        {message.text}
+                                    </div>
+                                    <span className="text-sm text-gray-500 mt-1">
+                                        {new Date(message.created_at).toLocaleTimeString()}
+                                    </span>
                                 </div>
-                                <span className="text-sm text-gray-500 mt-1">
-                                    {new Date(message.created_at).toLocaleTimeString()}
-                                </span>
                             </div>
+                        ))
+                    : (
+                        <div className="flex justify-center items-center h-full">
+                            <JoinChatPopupButton onJoin={onJoin}/>
                         </div>
-                    ))}
+                    )}
                 <div ref={bottomRef} />
             </div>
             {/* Message Input */}
-            < form
+            {isChatMember && < form
                 onSubmit={handleSendMessage}
                 className='border-t border-gray-200 p-4 flex items-center gap-4'
             >
@@ -215,6 +241,7 @@ function MessageArea() {
                     <Send size={20} />
                 </button>
             </form >
+            }
         </div >
 
     )

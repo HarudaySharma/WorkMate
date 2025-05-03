@@ -112,6 +112,8 @@ io.on('connection', (socket) => {
         socket.join(roomId)
 
         //socket.to(roomId).emit("message", `User: ${user.name} joined the room with id: ${roomId}`)
+        logger.info(`${user.username} joined the chat`)
+
         io.to(roomId).emit(INFO_EVENT, `${user.username} joined the chat`) // emits to all room members including the sender.
         // NOTE: if the client wants to switch to other chat, they must leave the chat room they are currently in first.
     })
@@ -128,6 +130,7 @@ io.on('connection', (socket) => {
         const { user } = socket.data as { user: JWTPayload["data"]["user"] };
 
         socket.leave(roomId)
+        logger.info(`${user.username} left the chat`)
         io.to(roomId).emit(INFO_EVENT, `${user.username} left the chat`) // emits to all room members including the sender.
     })
 })

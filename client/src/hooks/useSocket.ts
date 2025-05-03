@@ -8,10 +8,15 @@ export function useSocket() {
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
+        console.log({ socketCon: socket.connected, connected })
+    }, [socket.connected, connected])
+
+    useEffect(() => {
+        console.log("useSocket rendered")
+
         if (!socket.connected && !connected) {
             connectSocketWithAuth();
         }
-        console.log("useSocket rendered")
 
         const handleConnect = () => {
             console.log("Connected to socket server:", socket.id);
@@ -24,8 +29,15 @@ export function useSocket() {
         const handleInfoEvent = (msg: any) => {
             console.log(msg)
         }
+
         const handleConnectionError = (err: Error) => {
             console.error("❌ Connection error:", err);
+            console.log({ socketCon: socket.connected, connected })
+            if (!socket.connected) {
+                setConnected(false)
+                connectSocketWithAuth()
+                setConnected(true)
+            }
         }
 
         socket.on("connect", handleConnect)
@@ -34,6 +46,7 @@ export function useSocket() {
         socket.on(INFO_EVENT, handleInfoEvent)
 
         return () => {
+            console.log("socket hook clearing")
             socket.off("connect", handleConnect);
             socket.off("disconnect", handleDisconnect);
             socket.off("connect_error", handleConnectionError)

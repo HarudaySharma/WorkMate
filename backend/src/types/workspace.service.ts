@@ -46,7 +46,7 @@ export interface DeleteChatParams {
 }
 
 export interface CreateMessageParams {
-    chat: Pick<Chat, "workspace_id" | "id">;
+    chat: Pick<Chat, "workspace_id" | "id" | "type">;
     msg: Omit<Message, "created_at" | "is_deleted" | "message_id" | "sender_id" | "chat_id">;
     userId: User["id"];
 }
@@ -90,7 +90,7 @@ export interface GetWorkspaceChatsParams {
 export interface GetChatMessagesParams {
     userId: User["id"];
     workspaceId: WorkSpace["id"];
-    chatId: Chat["id"];
+    chat: Pick<Chat, "id" | "type">;
 }
 
 export interface DeleteChatMessageParams {

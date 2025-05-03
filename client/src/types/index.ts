@@ -62,6 +62,13 @@ export type Message = {
     // isUpdated: boolean
 }
 
+export type TypicalReturnObj = {
+    success: boolean;
+    message: string | undefined;
+
+}
+
+
 
 export type MessageReturn = Omit<Message, "is_deleted">;
 

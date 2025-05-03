@@ -188,6 +188,33 @@ class Workmate {
             const chatsRepo = new ChatRepository(await this.#db.getConnection())
 
             const chats = await chatsRepo.findByWkspcId({ workspace_id: workspaceId })
+            const chatMembersRepo = new ChatMemberRepository(await this.#db.getConnection())
+
+            // send only the group chats and the one-one chats of the user
+            // INFO: can't use filter with async callbacks so had to use map
+            const chatsWithFilter = await Promise.all(chats.map(async (chat) => {
+                if (chat.type === 'group') {
+                    return { chat, include: true };
+                }
+                if (chat.type === 'one-one') {
+                    // check if the user is member of chat
+                    try {
+                        const chatMbrs = await chatMembersRepo.findByChatId({ chat_id: chat.id });
+
+                        const include = chatMbrs.some(mrb => mrb.user_id === userId)
+
+                        return { chat, include }
+                    } catch (err) {
+                        throw new WorkmateError("INTERNAL_ERROR", "failed to retrieve user personal chats", StatusCodes.INTERNAL_SERVER_ERROR);
+                    }
+                }
+
+                return { chat, include: false }
+            }))
+
+            const filteredChat = chatsWithFilter
+                .filter(item => item.include)
+                .map(item => item.chat)
 
             return {
                 success: true,
@@ -196,7 +223,7 @@ class Workmate {
                     workspace: {
                         id: workspaceId,
                     },
-                    chats: chats,
+                    chats: filteredChat,
                 }
             }
 

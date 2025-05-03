@@ -26,7 +26,6 @@ const Chat = ({ workspaceId }: ChatProps) => {
 
     const [oneOneChatRecievers, setOneOneChatRecievers] = useState<ChatRecieverState>({}) // the direct message recievers whose already having a chat with the user
 
-
     const { socket, connected: socketConnected } = useSocket()
 
     const chatContextValue: ChatContextType = {
