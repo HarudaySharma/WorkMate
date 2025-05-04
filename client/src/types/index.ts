@@ -99,7 +99,7 @@ export interface GetMessagesEventParams {
 
 export interface CreateMessageEventParams {
     workspaceId: WorkSpace["id"];
-    chatId: Chat["id"];
+    chat: Pick<Chat, "id" | "type">;
     message: Pick<Message, "type" | "text" | "image_url" | "audio_url">;
 }
 

@@ -90,7 +90,7 @@ export interface GetWorkspaceChatsParams {
 export interface GetChatMessagesParams {
     userId: User["id"];
     workspaceId: WorkSpace["id"];
-    chat: Pick<Chat, "id" | "type">;
+    chatId: Chat["id"];
 }
 
 export interface DeleteChatMessageParams {
@@ -201,7 +201,7 @@ export interface GetMessagesEventParams {
 
 export interface CreateMessageEventParams {
     workspaceId: WorkSpace["id"];
-    chatId: Chat["id"];
+    chat: Pick<Chat, "id" | "type">;
     message: Pick<Message, "type" | "text" | "image_url" | "audio_url">;
 }
 

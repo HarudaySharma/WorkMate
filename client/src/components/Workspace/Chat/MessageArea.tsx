@@ -24,42 +24,21 @@ function MessageArea() {
 
     const [messages, setMessages] = useState<MessageReturn[]>([])
 
-    const hasJoinedRef = useRef(false)
+    const hasJoinedChatRoomRef = useRef(false)
     const [chatMembersMap, setChatMembersMap] = useState<chatMemberMapState>({})
     const [isChatMember, setIsChatMember] = useState(false)
 
     const bottomRef = useRef<HTMLDivElement>(null);
 
-    const handleSendMessage = (e: React.FormEvent) => {
-        e.preventDefault();
 
-        if (!newMessage.trim() || !selectedChat || !socketConnected) {
-            return
-        }
-
-        const createMessage = () => {
-            console.log("creating a new message....")
-            socket.emit("create-message", {
-                "workspaceId": workspaceId,
-                "chatId": selectedChat.id,
-                message: {
-                    type: 'text',
-                    text: newMessage,
-                },
-            } as CreateMessageEventParams);
-
-        }
-
-        createMessage()
-        setNewMessage("")
-    };
-
+    // effect to always keep the latest message in view.
     useEffect(() => {
         if (bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
 
+    // effect to have a map of chat members to access their data in jsx
     useEffect(() => {
         if (!selectedChatMembers) {
             return;
@@ -67,11 +46,6 @@ function MessageArea() {
 
         // check if the user is the member of this chat
         console.log({ selectedChatMembers })
-        if (selectedChatMembers?.find(mbr => mbr.id === user?.id)) {
-            setIsChatMember(true)
-        } else {
-            setIsChatMember(false)
-        }
 
         // create a map for ui
         const map: chatMemberMapState = {};
@@ -82,14 +56,46 @@ function MessageArea() {
 
     }, [selectedChatMembers])
 
-    useEffect(() => {
-        setMessages([])
 
-        if (!socketConnected || !selectedChat || hasJoinedRef.current) {
-            return
+    // effect to reset the neccessary states
+    useEffect(() => {
+        return () => {
+            console.log("cleaning.....")
+            setIsChatMember(false);
+            setMessages([])
+            hasJoinedChatRoomRef.current = false;
+        }
+    }, [selectedChat?.id]);
+
+    // effect to emit socket events
+    useEffect(() => {
+
+        console.log("socket hook rendering....")
+        console.log({ isChatMember, joinChatRoom: hasJoinedChatRoomRef.current, socketConnected })
+
+        const hasJoined = hasJoinedChatRoomRef.current;
+
+        // derive current member status directly
+        let isMbr = false;
+
+        // INFO: had to do this to get the latest (non-staled) value of isChatMember
+        //  issues arises when the user selects a chat which they are not a member of
+        setIsChatMember(prev => {
+            isMbr = prev;
+            return prev
+        })
+
+        const isActuallyMember = isMbr || selectedChatMembers?.some(m => m.id === user?.id);
+        if (isActuallyMember) {
+            setIsChatMember(true) // not adding isChatMember to this effect dependency array
+            //
+            // REASON: when if the isChatMember is false => it is set to true here and rest of the logic below is executed
+            //  now but as the isChatMember state is changed it will cause this hook to re-render thus disrupting the below logic asynchronously
+            //
+            //  SEEN SCENARIO: user joins the chat and the fetchMessages fuction also get called but the messages are never recieved i.e the handleChatMessages is not invoked (cause the re-render initiated in middle of execution of the fetchMessages which de-registers the handleChatMessages in the cleanup function.
         }
 
-        if (!isChatMember) {
+        if (!socketConnected || !selectedChat || !isActuallyMember || hasJoined) {
             return
         }
 
@@ -105,58 +111,87 @@ function MessageArea() {
 
         // fetch messages
         const fetchMessages = () => {
+            console.log("fetching messages...")
             socket.emit("get-messages", {
-                "workspaceId": workspaceId,
-                "chatId": selectedChat.id,
-                "offset": 0,
-                "limit": 0,
+                workspaceId: workspaceId,
+                chatId: selectedChat.id,
+                offset: 0,
+                limit: 0,
             } as GetMessagesEventParams);
         }
 
         // join the chat room
-        const joinChat = () => {
+        const joinChatRoom = () => {
+            if (!isActuallyMember) {
+                console.warn("Attempted to join a chat room without being a member.");
+                return;
+            }
+
             console.log(`joining the chat: ${selectedChat.name}, id: ${selectedChat.id}`)
             socket.emit("join-chat", {
                 "workspaceId": workspaceId,
                 "chatId": selectedChat.id,
             } as JoinChatEventParams);
 
-            hasJoinedRef.current = true;
+            hasJoinedChatRoomRef.current = true;
             fetchMessages()
         }
 
         socket.on("chat-messages", handleChatMessages)
         socket.on("new-message", handleNewMessage)
 
-        joinChat();
+        joinChatRoom();
 
         return () => {
             // leave the chat room
-            console.log("leaving chat room")
+            console.log(`leaving the chat room`)
             socket.emit("leave-chat", {
                 workspaceId: workspaceId,
                 chatId: selectedChat.id,
             } as LeaveChatEventParams)
 
-            hasJoinedRef.current = false;
             socket.off("chat-messages", handleChatMessages);
             socket.off("new-message", handleNewMessage);
 
         }
 
-    }, [selectedChat, socketConnected, isChatMember])
+    }, [selectedChat, socketConnected, selectedChatMembers])
 
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!newMessage.trim() || !selectedChat || !socketConnected || !isChatMember) {
+            return
+        }
+
+        const createMessage = () => {
+            console.log("creating a new message....")
+            socket.emit("create-message", {
+                "workspaceId": workspaceId,
+                chat: {
+                    id: selectedChat.id,
+                    type: selectedChat.type,
+                },
+                message: {
+                    type: 'text',
+                    text: newMessage,
+                },
+            } as CreateMessageEventParams);
+
+        }
+
+        createMessage()
+        setNewMessage("")
+    };
 
     const onJoin = () => {
         setIsChatMember(true)
     }
 
 
-
     if (!selectedChat) {
         return <></>
     }
-
 
     return (
 
@@ -216,7 +251,7 @@ function MessageArea() {
                         ))
                     : (
                         <div className="flex justify-center items-center h-full">
-                            <JoinChatPopupButton onJoin={onJoin}/>
+                            <JoinChatPopupButton onJoin={onJoin} />
                         </div>
                     )}
                 <div ref={bottomRef} />

@@ -57,8 +57,8 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on("create-message", async ({ message, chatId, workspaceId }: CreateMessageEventParams) => {
-        if (!workspaceId && !chatId) {
+    socket.on("create-message", async ({ message, chat, workspaceId }: CreateMessageEventParams) => {
+        if (!workspaceId && !chat) {
             socket._error(new Error("please send workspace id an chat id"))
             return
         }
@@ -71,7 +71,8 @@ io.on('connection', (socket) => {
             const ret = await workmate.createMessage({
                 userId: user.id,
                 chat: {
-                    id: chatId,
+                    id: chat.id,
+                    type: chat.type,
                     workspace_id: workspaceId,
                 },
                 msg: {
@@ -82,7 +83,7 @@ io.on('connection', (socket) => {
                 }
             })
 
-            const roomId = generateRoomId(workspaceId, chatId)
+            const roomId = generateRoomId(workspaceId, chat.id)
             io.to(roomId).emit("new-message", ret.data.message)
         }
         catch (err) {
@@ -112,7 +113,7 @@ io.on('connection', (socket) => {
         socket.join(roomId)
 
         //socket.to(roomId).emit("message", `User: ${user.name} joined the room with id: ${roomId}`)
-        logger.info(`${user.username} joined the chat`)
+        logger.info(`${user.username} joined the chat: ${chatId}`)
 
         io.to(roomId).emit(INFO_EVENT, `${user.username} joined the chat`) // emits to all room members including the sender.
         // NOTE: if the client wants to switch to other chat, they must leave the chat room they are currently in first.
@@ -130,7 +131,7 @@ io.on('connection', (socket) => {
         const { user } = socket.data as { user: JWTPayload["data"]["user"] };
 
         socket.leave(roomId)
-        logger.info(`${user.username} left the chat`)
+        logger.info(`${user.username} left the chat ${chatId}`)
         io.to(roomId).emit(INFO_EVENT, `${user.username} left the chat`) // emits to all room members including the sender.
     })
 })

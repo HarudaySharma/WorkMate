@@ -111,9 +111,13 @@ function OneOneChatList() {
         fetchMembers();
     }, [chats, workspaceId, user]);
 
+    if (!oneOneChats) {
+        return <></>
+    }
+
     return (
         <div className='space-y-2'>
-            {oneOneChats?.map((chat) => (
+            {oneOneChats.map((chat) => (
                 <button
                     key={`${chat.id} + ${oneOneChatRecievers[chat.id]?.username}`}
                     onClick={() => setSelectedChat(chat)}
@@ -158,9 +162,13 @@ function GroupsList() {
 
     const groupChats = chats?.filter(chat => chat.type === 'group')
 
+    if (!groupChats) {
+        return <></>
+    }
+
     return (
         <div className='space-y-2'>
-            {groupChats?.map((chat) => (
+            {groupChats.map((chat) => (
                 <button
                     key={chat.id + chat.name! /*there will always be a name of group chats*/}
                     onClick={() => changeSelectedChat(chat)}

@@ -74,11 +74,11 @@ const Chat = ({ workspaceId }: ChatProps) => {
 
                     {/* Under Left Section */}
                     {isFetching && <Loader width='12' height='12' />}
-                    {chats && <ChatList />}
+                    <ChatList />
 
                 </div>
 
-                {selectedChat && <MessageArea />}
+                <MessageArea />
 
                 {showNewGroup && <NewGroupChat onClose={() => setShowNewGroup(false)} />}
                 {showNewDirect &&
