@@ -3,7 +3,11 @@ import { ErrorFormat, WorkSpaceOmitInviteLink } from "../types"
 import { useQuery } from "@tanstack/react-query"
 
 
-const useWorkspaceList = () => {
+interface UserWorkspaceListParams {
+    startFetching: boolean;
+}
+
+const useWorkspaceList = ({startFetching}: UserWorkspaceListParams) => {
     return useQuery({
         queryKey: ["workspace-list"],
         queryFn: async () => {
@@ -16,7 +20,9 @@ const useWorkspaceList = () => {
                 throw (await resp.json()) as ErrorFormat;
             }
             return (await resp.json()).data.workspaces as WorkSpaceOmitInviteLink[];
-        }
+        },
+
+        enabled: !!startFetching
     })
 }
 

@@ -15,7 +15,8 @@ const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
 
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { data, error, isFetching } = useWorkspaceList()
+
+    const { data, error, isFetching } = useWorkspaceList({ startFetching: true })
 
     const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false)
 
@@ -24,6 +25,7 @@ const WorkspacesList: React.FC<WorkspacesListProps> = ({ onClose }) => {
             toast.error(error.message)
         }
     }, [error])
+
 
     if (!user) {
         return <></>
