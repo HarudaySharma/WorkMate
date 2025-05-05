@@ -1,7 +1,7 @@
 import { Connection, ResultSetHeader } from "mysql2/promise";
 import { WorkspaceMember } from "../../database_schema.js";
 import logger from "../../logger.js";
-import { ADD_WORKSPACE_MEMBER, DELETE_WORKSPACE_MEMBER, FIND_WORKSPACE_MEMBER, FIND_WORKSPACE_MEMBERS_BY_WORKSPACE_ID } from "./queries/workspaceMemberQueries.js";
+import { ADD_WORKSPACE_MEMBER, DELETE_WORKSPACE_MEMBER, FIND_WORKSPACE_MEMBER, FIND_WORKSPACE_MEMBERS_BY_WORKSPACE_ID, MODIFY_WORKSPACE_MEMBER } from "./queries/workspaceMemberQueries.js";
 
 class WorkspaceMemberRepository {
     #database: Connection
@@ -76,6 +76,28 @@ class WorkspaceMemberRepository {
 
             return rows[0] as WorkspaceMember;
 
+        } catch (err) {
+            logger.error(err)
+            throw new Error("failed to execute query on db")
+        }
+    }
+
+    async update(member: Pick<WorkspaceMember, "role" | "user_id" | "workspace_id">) {
+        // await this.#database.connect() // makes sure that the database is connected
+
+        try {
+            const [rows] = await this.#database.execute(MODIFY_WORKSPACE_MEMBER, [
+                member.role, member.user_id, member.workspace_id
+            ])
+
+            const header = rows as ResultSetHeader
+            if (header.affectedRows !== 1) {
+                throw new Error(`failed to modify member {user_id: ${member.user_id}, workspace_id: ${member.workspace_id}}`)
+            }
+
+            logger.info(`Modified member {user_id: ${member.user_id}, workspace_id: ${member.workspace_id}} in db`)
+
+            return
         } catch (err) {
             logger.error(err)
             throw new Error("failed to execute query on db")

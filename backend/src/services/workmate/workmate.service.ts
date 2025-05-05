@@ -37,6 +37,10 @@ import {
     DeleteChatRet,
     LeaveChatRet,
     LeaveChatParams,
+    LeaveWorkspaceParams,
+    RemoveWorkspaceMemberRet,
+    ModifyWorkspaceMemberParams,
+    RemoveWorkspaceMember,
 } from "../../types/workspace.service.js";
 import UserRepository from "../mqsql/UserRepository.service";
 import ChatRepository from "../mqsql/ChatRepository.service";
@@ -369,7 +373,7 @@ class Workmate {
 
             return {
                 success: true,
-                message: `user leaved the chat successfully`
+                message: `user left the chat successfully`
             }
 
         } catch (err) {
@@ -686,6 +690,116 @@ class Workmate {
             if (!(err instanceof WorkmateError)) {
                 logger.error(err);
                 throw new WorkmateError("INTERNAL_ERROR", "failed to join workspace", StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
+    async modifyWorkspaceMember({ workspaceId, userId, member }: ModifyWorkspaceMemberParams): Promise<RemoveWorkspaceMemberRet> {
+        try {
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(workspaceId)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            // checking if the user initiating the modification is 'admin' or not
+            const user = await mbrsRepo.find({ user_id: userId, workspace_id: workspaceId })
+            if (!user) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of workspace`, StatusCodes.UNAUTHORIZED)
+            }
+            if (user.role !== 'admin') {
+                throw new WorkmateError("USER_ERROR", `no access to modify workspace data`, StatusCodes.UNAUTHORIZED)
+            }
+
+            await mbrsRepo.update({
+                role: member.role,
+                workspace_id: workspaceId,
+                user_id: member.user_id,
+            })
+
+            return {
+                success: true,
+                message: `user data modified successfully`
+            }
+
+        } catch (err) {
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", `failed to modify user data `, StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+
+    }
+
+    async removeWorkspaceMember({ workspaceId, userId, member }: RemoveWorkspaceMember): Promise<RemoveWorkspaceMemberRet> {
+        try {
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(workspaceId)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            // checking if the user initiating the modification is 'admin' or not
+            const user = await mbrsRepo.find({ user_id: userId, workspace_id: workspaceId })
+            if (!user) {
+                throw new WorkmateError("USER_ERROR", `user is not a member of workspace`, StatusCodes.UNAUTHORIZED)
+            }
+            if (user.role !== 'admin') {
+                throw new WorkmateError("USER_ERROR", `no access to remove workspace member`, StatusCodes.UNAUTHORIZED)
+            }
+
+            await this.leaveWorkspace({workspaceId, userId: member.user_id})
+
+            return {
+                success: true,
+                message: `member removed from the workspace successfully`
+            }
+
+        } catch (err) {
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", `failed to remove workspace member`, StatusCodes.INTERNAL_SERVER_ERROR);
+            }
+            throw err;
+        }
+    }
+
+    async leaveWorkspace({ workspaceId, userId }: LeaveWorkspaceParams): Promise<RemoveWorkspaceMemberRet> {
+        try {
+            const wkspcRepo = new WorkspaceRepository(await this.#db.getConnection())
+
+            const wkspc = await wkspcRepo.findById(workspaceId)
+            if (wkspc === null) {
+                throw new WorkmateError("USER_ERROR", `workspace not found, make sure the Workspace ID is valid`, StatusCodes.BAD_REQUEST)
+            }
+
+            const mbrsRepo = new WorkspaceMemberRepository(await this.#db.getConnection())
+
+            await mbrsRepo.delete({
+                workspace_id: workspaceId,
+                user_id: userId,
+            })
+
+            return {
+                success: true,
+                message: `user left the workspace successfully`
+            }
+
+        } catch (err) {
+
+            if (!(err instanceof WorkmateError)) {
+                logger.error(err);
+                throw new WorkmateError("INTERNAL_ERROR", `failed to leave workspace {id: ${workspaceId}}`, StatusCodes.INTERNAL_SERVER_ERROR);
             }
             throw err;
         }

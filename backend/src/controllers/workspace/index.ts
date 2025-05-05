@@ -7,6 +7,7 @@ import logger from "../../logger.js";
 import Workmate from "../../services/workmate/workmate.service.js";
 import { WorkmateError } from "../../types/workspace.service.js";
 import generateInviteToken from "../../utils/generateInviteLink.js";
+import { WorkspaceMember } from "../../database_schema.js";
 
 
 // TODO: test all these routes
@@ -109,7 +110,7 @@ export const createWorkspace = async (req: Request, res: Response, next: NextFun
     }
 
     const { name, inviteLink } = req.body;
-    logger.info({body: req.body})
+    logger.info({ body: req.body })
 
     if (name === undefined || inviteLink === undefined) {
         next(new Errorr("Insufficient data provided", StatusCodes.BAD_REQUEST));
@@ -268,5 +269,149 @@ export const getInviteToken = async (req: Request, res: Response, next: NextFunc
 
     const uniqueInviteLink = generateInviteToken()
 
-    res.json({token: uniqueInviteLink})
+    res.json({ token: uniqueInviteLink })
 }
+
+export const removeWorkspaceMember = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: DELETE /workspace/member")
+
+    if (!req.user) {
+        next(new Errorr("no user found, cannot remove workspace member", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { id: userId } = req.user;
+    if (userId === undefined) {
+        next(new Errorr("invalid user id, cannot remove workspace member", StatusCodes.UNAUTHORIZED));
+    }
+
+    const { workspaceId } = req.params
+
+    if (workspaceId === undefined) {
+        next(new Errorr("no Workspace Id provided", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { member } = req.body as { member: { id: WorkspaceMember["user_id"] } }
+
+    try {
+        const workmate = new Workmate(db);
+
+        const ret = await workmate.removeWorkspaceMember({
+            workspaceId: +workspaceId,
+            userId: userId,
+            member: {
+                user_id: member.id,
+            }
+        })
+
+        res.status(StatusCodes.OK).json(ret)
+    } catch (err) {
+        const er = err as WorkmateError; // err will always be of type WorkmateError
+        if (er.type === undefined) { // this won't happen usually
+            logger.error(err)
+            next(new Errorr("internal server error"));
+            return
+        }
+
+        logger.error(er.error)
+
+        const statusCode = (er.type === "USER_ERROR" ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR);
+        next(new Errorr(er.message, er.httpStatusCode || statusCode))
+    }
+}
+export const leaveWorkspace = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: PATCH /workspace/leave")
+
+    if (!req.user) {
+        next(new Errorr("no user found, cannot leave workspace", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { id: userId } = req.user;
+    if (userId === undefined) {
+        next(new Errorr("invalid user id, cannot leave workspace", StatusCodes.UNAUTHORIZED));
+    }
+
+    const { workspaceId } = req.params
+
+    if (workspaceId === undefined) {
+        next(new Errorr("no Workspace Id provided", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    try {
+        const workmate = new Workmate(db);
+
+        const ret = await workmate.leaveWorkspace({
+            workspaceId: +workspaceId,
+            userId: userId,
+        })
+
+        res.status(StatusCodes.OK).json(ret)
+    } catch (err) {
+        const er = err as WorkmateError; // err will always be of type WorkmateError
+        if (er.type === undefined) { // this won't happen usually
+            logger.error(err)
+            next(new Errorr("internal server error"));
+            return
+        }
+
+        logger.error(er.error)
+
+        const statusCode = (er.type === "USER_ERROR" ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR);
+        next(new Errorr(er.message, er.httpStatusCode || statusCode))
+    }
+}
+
+
+export const modifyWorkspaceMember = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("HIT: PATCH /workspace/modify/member")
+
+    if (!req.user) {
+        next(new Errorr("no user found, cannot leave workspace", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { id: userId } = req.user;
+    if (userId === undefined) {
+        next(new Errorr("invalid user id, cannot leave workspace", StatusCodes.UNAUTHORIZED));
+    }
+
+    const { workspaceId } = req.params
+
+    if (workspaceId === undefined) {
+        next(new Errorr("no Workspace Id provided", StatusCodes.UNAUTHORIZED));
+        return
+    }
+
+    const { member } = req.body as { member: WorkspaceMember }
+
+    try {
+        const workmate = new Workmate(db);
+
+        const ret = await workmate.modifyWorkspaceMember({
+            workspaceId: +workspaceId,
+            userId: userId,
+            member: {
+                user_id: member.user_id,
+                role: member.role,
+            }
+        })
+
+        res.status(StatusCodes.OK).json(ret)
+    } catch (err) {
+        const er = err as WorkmateError; // err will always be of type WorkmateError
+        if (er.type === undefined) { // this won't happen usually
+            logger.error(err)
+            next(new Errorr("internal server error"));
+            return
+        }
+
+        logger.error(er.error)
+
+        const statusCode = (er.type === "USER_ERROR" ? StatusCodes.BAD_REQUEST : StatusCodes.INTERNAL_SERVER_ERROR);
+        next(new Errorr(er.message, er.httpStatusCode || statusCode))
+    }
+}
+

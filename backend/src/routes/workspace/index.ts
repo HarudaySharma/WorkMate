@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { verifyToken } from "../../middlewares/verifyToken.middleware.js";
-import { createWorkspace, deleteWorkspace, getInviteToken, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace } from "../../controllers/workspace/index.js";
+import { createWorkspace, deleteWorkspace, getInviteToken, getUserWorkspaces, getWorkspace, getWorkspaceMembers, joinWorkspace, leaveWorkspace, modifyWorkspaceMember, removeWorkspaceMember } from "../../controllers/workspace/index.js";
 
 const router = Router();
 
@@ -12,8 +12,13 @@ router.get("/:workspaceId/members", verifyToken, getWorkspaceMembers);
 router.get("/:workspaceId", verifyToken, getWorkspace);
 
 router.put("/", verifyToken, createWorkspace)
+
 router.delete("/:workspaceId", verifyToken, deleteWorkspace)
+router.delete("/:workspaceId/member", verifyToken, removeWorkspaceMember)
+
 router.patch("/:inviteLink/join", verifyToken, joinWorkspace)
+router.patch("/:workspaceId", verifyToken, leaveWorkspace)
+router.patch("/:workspaceId/modify/member", verifyToken, modifyWorkspaceMember)
 
 // INFO:
 //  1. user can create workspace

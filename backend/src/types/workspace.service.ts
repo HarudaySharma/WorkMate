@@ -111,6 +111,22 @@ export interface GetChatMembersParams {
     chatId: Chat["id"];
 }
 
+export interface LeaveWorkspaceParams {
+    workspaceId: WorkSpace["id"];
+    userId: User["id"];
+}
+
+export interface RemoveWorkspaceMember {
+    workspaceId: WorkSpace["id"];
+    userId: User["id"];
+    member: Pick<WorkspaceMember, "user_id">;
+}
+
+export interface ModifyWorkspaceMemberParams {
+    workspaceId: WorkSpace["id"];
+    userId: User["id"];
+    member: Omit<WorkspaceMember, "workspace_id">;
+}
 
 // returns
 export interface JoinWorkspaceRet extends WorkmateReturnObj {
@@ -153,6 +169,8 @@ export interface CreateMessageRet extends WorkmateReturnObj {
 }
 
 export interface LeaveChatRet extends WorkmateReturnObj { }
+export interface RemoveWorkspaceMemberRet extends WorkmateReturnObj { }
+export interface ModifyWorkspaceMemberRet extends WorkmateReturnObj { }
 export interface DeleteWorkspaceRet extends WorkmateReturnObj { }
 
 export interface DeleteChatRet extends WorkmateReturnObj { }
