@@ -24,7 +24,7 @@ const Workspace = () => {
     const [startWkspcListFetching, setStartWkspcListFetching] = useState(false)
     const { data: workspaces, error, isFetching } = useWorkspaceList({ startFetching: startWkspcListFetching })
 
-    const { data: workspaceMembers } = useWorkspaceMembersList({ workspaceId: Number(workspaceId) })
+    const { data: workspaceMembers, refetch: refetchWorkspaceMembers } = useWorkspaceMembersList({ workspaceId: Number(workspaceId) })
     const { data: workspaceInfo } = useWorkspaceInfo({ workspaceId: Number(workspaceId) })
 
     const navigate = useNavigate();
@@ -52,6 +52,7 @@ const Workspace = () => {
         id: +workspaceId,
         workspaceMembers: workspaceMembers,
         workspaceInfo: workspaceInfo,
+        refetchWorkspaceMembers,
     }
 
     return (

@@ -3,47 +3,21 @@ import React, { useEffect, useState } from 'react'
 import useWorkspaceMembersList from '../../hooks/useWorkspaceMembersList';
 import useAuth from '../../hooks/useAuth';
 import useWorkspaceContext from '../../hooks/useWorkspaceContext';
-import { WorkSpace, WorkspaceMember } from '../../types';
+import { ErrorFormat, WorkSpace, WorkspaceMember } from '../../types';
 import Loader from '../Loader';
 import toast from 'react-hot-toast';
-
-interface Member {
-    id: number;
-    name: string;
-    email: string;
-    role: 'Admin' | 'Member';
-    avatar: string;
-}
-
-// Mock data - in a real app this would come from your backend
-const members: Member[] = [
-    {
-        id: 1,
-        name: 'Harshit Thakur',
-        email: 'harrythakur2102@gmail.com',
-        role: 'Admin',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100'
-    },
-    {
-        id: 2,
-        name: 'Sarah Wilson',
-        email: 'sarah.wilson@example.com',
-        role: 'Admin',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100'
-    },
-    {
-        id: 3,
-        name: 'Mike Johnson',
-        email: 'mike.johnson@example.com',
-        role: 'Member',
-        avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=100&h=100'
-    }
-];
+import removeWorkspaceMember from '../../utils/removeWorkspaceMember';
+import modifyWorkspaceMember from '../../utils/modifyWorkspaceMember';
 
 const WorkSpaceInfo = () => {
 
     const { user } = useAuth();
-    const { workspaceMembers, workspaceInfo } = useWorkspaceContext()
+    const {
+        id: workspaceId,
+        workspaceMembers,
+        workspaceInfo,
+        refetchWorkspaceMembers,
+    } = useWorkspaceContext()
 
     const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
     const [currentUserRole, setCurrentUserRole] = useState<WorkspaceMember['role']>('member')
@@ -83,16 +57,41 @@ const WorkSpaceInfo = () => {
         toast.success("copied")
     }
 
-    const handleAssignAdmin = (memberId: number) => {
+    const handleAssignAdmin = async (memberId: number) => {
         // Handle admin assignment logic
-        toast.error("functionality not added yet")
         console.log('Assign admin:', memberId);
+        try {
+            const ret = await modifyWorkspaceMember({
+                workspaceId: workspaceId,
+                member: {
+                    user_id: memberId,
+                    role: 'admin',
+                }
+            })
+
+            toast.success(ret.message || "modified member role")
+            refetchWorkspaceMembers();
+        }
+        catch (err) {
+            toast.error((err as ErrorFormat).message)
+        }
     }
 
-    const handleRemoveMember = (memberId: number) => {
+    const handleRemoveMember = async (memberId: number) => {
         // Handle member removal logic
-        toast.error("functionality not added yet")
         console.log('Remove member:', memberId);
+        try {
+            const ret = await removeWorkspaceMember({
+                memberId: memberId,
+                workspaceId: workspaceId,
+            })
+
+            toast.success(ret.message || "removed member")
+            refetchWorkspaceMembers();
+        }
+        catch (err) {
+            toast.error((err as ErrorFormat).message)
+        }
     }
 
     return (

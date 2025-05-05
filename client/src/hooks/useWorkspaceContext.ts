@@ -1,9 +1,13 @@
 import { createContext, useContext } from "react";
 import { WorkSpaceInfo, WorkspaceMemberReturn } from "../types";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
 export interface WorkspaceContextType {
     id: number;
+
     workspaceMembers: WorkspaceMemberReturn[] | undefined;
+    refetchWorkspaceMembers: (options?: RefetchOptions) => Promise<QueryObserverResult<WorkspaceMemberReturn[], Error>>
+
     workspaceInfo: WorkSpaceInfo | undefined;
  }
 
