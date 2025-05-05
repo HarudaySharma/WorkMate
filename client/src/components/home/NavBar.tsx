@@ -84,7 +84,7 @@ const NavBar = () => {
                         className='bg-customYellow px-8 lg:px-12 py-2.5 font-semibold rounded-lg
                         tracking-wide text-customBlack hover:font-bold font-nunito hover:bg-yellow-500
                         dark:border-customYellow dark:border-2 dark:bg-customBlack dark:text-gray-100 dark:hover:text-gray-900
-                        '>
+                        hover: cursor-pointer'>
                             CREATE WORKSPACE
                         </button>
                     </div>

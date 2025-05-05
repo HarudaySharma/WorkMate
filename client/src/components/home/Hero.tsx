@@ -52,7 +52,8 @@ const Hero = () => {
 
                         <button
                             onClick={getStartedClickHandler}
-                            className='bg-customYellow hover:bg-yellow-500 text-customBlack font-bold py-3 px-8 rounded-lg transition-colors'>
+                            className='bg-customYellow hover:bg-yellow-500 text-customBlack font-bold py-3 
+                            px-8 rounded-lg transition-colors hover:cursor-pointer'>
                             Get Started
                         </button>
                     </div>

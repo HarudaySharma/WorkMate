@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import logo from '../assets/logoWMnew-Photoroom.png'
-import { Bolt, CalendarCheck2, HomeIcon, Info, MessageCircleMore, Plus, Search, User } from 'lucide-react'
+import { Bolt, CalendarCheck2, ExternalLink, HomeIcon, Info, MessageCircleMore, Plus, Search, User } from 'lucide-react'
 import Chat from '../components/Workspace/Chat/Chat';
 import UserProfile from '../components/UserProfile';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -12,6 +12,7 @@ import Loader from '../components/Loader';
 import useWorkspaceMembersList from '../hooks/useWorkspaceMembersList';
 import { WorkspaceContext, WorkspaceContextType } from '../hooks/useWorkspaceContext';
 import useWorkspaceInfo from '../hooks/useWorkspaceInfo';
+import JoinWorkspaceModal from '../components/Workspace/JoinWorkspaceModal';
 
 const Workspace = () => {
 
@@ -20,6 +21,7 @@ const Workspace = () => {
     const [isWorkspaceOpen, setIsWorkpaceOpen] = useState(false);
     const [activeTab, setIsActiveTab] = useState('home');
     const [newWorkSpace, setNewWorkSpace] = useState(false);
+    const [showJoinModal, setShowJoinModal] = useState(false);
 
     const [startWkspcListFetching, setStartWkspcListFetching] = useState(false)
     const { data: workspaces, error, isFetching } = useWorkspaceList({ startFetching: startWkspcListFetching })
@@ -75,7 +77,7 @@ const Workspace = () => {
                         <button
                             onClick={() => { console.log('Workspace button clicked'); setIsWorkpaceOpen(!isWorkspaceOpen) }}
                             className='w-10 h-10 bg-customYellow rounded-lg flex items-center justify-center
-                 text-white hover:bg-customBlue transition-colors'>
+                 text-white hover:bg-customBlue transition-colors hover:cursor-pointer'>
                             <User size={20} />
                         </button>
 
@@ -96,7 +98,7 @@ const Workspace = () => {
                                                 setIsWorkpaceOpen(false)
                                                 navigate(`/workspace/${workspace.id}`)
                                             }}
-                                            className='w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3'>
+                                            className='w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 hover:cursor-pointer'>
 
                                             <div className={`w-8 h-8 ${idx % 2 ? 'bg-purple-500' : 'bg-green-500'} rounded-lg flex items-center
                                     justify-center text-white font-medium`}>
@@ -114,7 +116,7 @@ const Workspace = () => {
                                     <button
                                         onClick={() => setNewWorkSpace(true)}
                                         className="w-full px-3 py-2 text-left text-sm text-customBlue
-                              hover:bg-gray-50 rounded-md flex items-center gap-2">
+                              hover:bg-gray-50 rounded-md flex items-center gap-2 hover:cursor-pointer">
                                         <Plus size={18} />
                                         <span>Create New Workspace</span>
                                     </button>
@@ -129,7 +131,7 @@ const Workspace = () => {
                         <button
                             onClick={() => setIsActiveTab('home')}
                             className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                text-gray-600 hover:bg-gray-100 transition-colors hover:cursor-pointer hover:text-customBlue
                 dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
                 ${activeTab === 'home' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
                         >
@@ -139,7 +141,7 @@ const Workspace = () => {
                         <button
                             onClick={() => setIsActiveTab('chat')}
                             className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                text-gray-600 hover:bg-gray-100 transition-colors hover:cursor-pointer hover:text-customBlue
                 dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
                 ${activeTab === 'chat' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>
                             <MessageCircleMore size={24} />
@@ -148,7 +150,7 @@ const Workspace = () => {
                         <button
                             onClick={() => setIsActiveTab('calendar')}
                             className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                text-gray-600 hover:bg-gray-100 transition-colors hover:cursor-pointer hover:text-customBlue
                 dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
                 ${activeTab === 'calendar' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>
                             <CalendarCheck2 size={24} />
@@ -157,14 +159,14 @@ const Workspace = () => {
                         <button
                             onClick={() => setIsActiveTab('info')}
                             className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors hover:text-customBlue
+                text-gray-600 hover:bg-gray-100 transition-colors hover:cursor-pointer hover:text-customBlue
                 dark:text-gray-300 dark:hover:bg-gray-500 dark:hover:text-customYellow
                 ${activeTab === 'info' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>
                             <Info size={24} />
                         </button>
 
                         <button className={`w-10 h-10 rounded-lg flex items-center justify-center
-                text-gray-600 hover:bg-gray-100 transition-colors mt-64
+                text-gray-600 hover:bg-gray-100 transition-colors mt-64 hover:cursor-pointer
                 dark:text-gray-300 dark:hover:bg-gray-500
                 ${activeTab === 'settings' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}>                        <Bolt size={24} />
                         </button>
@@ -193,14 +195,23 @@ const Workspace = () => {
                             </div>
                         </div>
 
+                        {/* Join Workspace */}
+                        <button
+                            onClick={() => setShowJoinModal(true)}
+                            className='bg-customYellow text-gray-800 px-4 py-2 rounded-lg flex items-center space-x-2
+                  hover:bg-yellow-500 transition-colors hover:cursor-pointer'>
+                            <ExternalLink size={20}/>
+                            <span>Join Workspace</span>
+                        </button>
+
                         {/* Create New Workspace Button */}
                         <button
                             onClick={() => setNewWorkSpace(true)}
                             className='bg-customBlue text-white px-4 py-2 rounded-lg flex items-center space-x-2
-                  hover:bg-blue-700 transition-colors'>
+                  hover:bg-blue-700 transition-colors hover:cursor-pointer'>
                             <Plus size={20} />
                             <span>Create New Workspace</span>
-                        </button>
+                        </button>   
 
                         {/* Profile button with dropdown */}
                         <div className="text-center">
@@ -218,7 +229,7 @@ const Workspace = () => {
                             ) : activeTab === 'info' ? (
                                 <WorkSpaceInfo />
                             ) : (
-                                <div className='flex items-center justify-center h-full text-gray-500 dark:text-gray-100'>
+                                <div className='flex items-center justify-center h-full text-gray-500 dark:text-gray-700'>
                                     Select Tab to view content.
                                 </div>
                             )}
@@ -231,9 +242,18 @@ const Workspace = () => {
                         <CreateWorkspaceModal onClose={() => setNewWorkSpace(false)} />
                     )
                 }
+                {
+                    showJoinModal && (
+                        <JoinWorkspaceModal onClose={() => setShowJoinModal(false)}/>
+                    )
+                }
             </div >
         </WorkspaceContext.Provider>
     )
 }
 
 export default Workspace
+
+
+
+

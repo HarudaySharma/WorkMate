@@ -48,7 +48,7 @@ const NewGroupChat: React.FC<NewGroupChatProp> = ({ onClose }) => {
             {/*<div className='bg-gray-50 rounded-2xl p-8 w-full max-w-md relative border border-gray-200'>*/}
                 <button
                     onClick={onClose}
-                    className='absolute top-4 right-4 text-gray-500 text-2xl'
+                    className='absolute top-4 right-4 text-gray-500 text-2xl hover:cursor-pointer'
                 >
                     ×
                 </button>

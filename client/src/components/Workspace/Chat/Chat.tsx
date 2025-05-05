@@ -66,7 +66,7 @@ const Chat = () => {
                         </span>
 
                         <button className='bg-customBlue text-white px-2 py-2 rounded-lg flex items-center
-                justify-center hover:bg-blue-700 transition-colors'>
+                justify-center hover:bg-blue-700 transition-colors hover:cursor-pointer'>
                             <SquarePen size={20} />
                         </button>
                     </div>

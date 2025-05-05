@@ -164,7 +164,7 @@ const WorkSpaceInfo = () => {
                                     <div className='relative inline-block'>
                                         <button
                                             onClick={() => setSelectedMemberId(selectedMemberId === member.id ? null : member.id)}
-                                            className='p-1 hover:bg-gray-200 rounded-full'>
+                                            className='p-1 hover:bg-gray-200 rounded-full hover:cursor-pointer'>
                                             <MoreHorizontal size={20} className='text-gray-500' />
                                         </button>
 
