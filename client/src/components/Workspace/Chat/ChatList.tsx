@@ -128,7 +128,7 @@ function OneOneChatList() {
                         <div className='relative'>
                             <img
                                 src={oneOneChatRecievers[chat.id]?.profile_picture}
-                                alt={oneOneChatRecievers[chat.id]?.username}
+                                alt={oneOneChatRecievers[chat.id]?.username.charAt(0).toUpperCase()}
                                 className='w-6 h-6 rounded-full'
                             />
                             {/*<div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full

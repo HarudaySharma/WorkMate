@@ -208,8 +208,8 @@ function MessageArea() {
                 < div className="relative h-16 border-b border-gray-200 px-6 flex items-center" >
                     <img
                         src={oneOneChatRecievers[selectedChat.id]?.profile_picture}
-                        alt={oneOneChatRecievers[selectedChat.id]?.username}
-                        className='w-6 h-6 rounded-full'
+                        alt={oneOneChatRecievers[selectedChat.id]?.username.charAt(0).toUpperCase()}
+                        className='w-6 h-6 rounded-full bg-amber-100 text-center m-2'
                     />
                     <h2 className="text-xl font-semibold text-gray-800">
                         {oneOneChatRecievers[selectedChat.id]?.name || oneOneChatRecievers[selectedChat.id]?.username}

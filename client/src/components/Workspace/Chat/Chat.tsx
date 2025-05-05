@@ -1,5 +1,5 @@
 import { SquarePen } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import useWorkspaceChatList from '../../../hooks/useWorkspaceChatList';
 import ChatList from './ChatList';
 import { ChatContext, ChatContextType, ChatRecieverState } from '../../../hooks/useChatContext';
@@ -11,14 +11,13 @@ import NewDirectMessage from './NewDirectMessage';
 import NewGroupChat from './NewGroupChat';
 import { useSocket } from '../../../hooks/useSocket';
 import useChatMembers from '../../../hooks/useChatMembers';
+import useWorkspaceContext from '../../../hooks/useWorkspaceContext';
 
-interface ChatProps {
-    workspaceId: number;
-}
-
-const Chat = ({ workspaceId }: ChatProps) => {
+const Chat = () => {
     const [showNewGroup, setShowNewGroup] = useState(false);
     const [showNewDirect, setShowNewDirect] = useState(false);
+
+     const {id: workspaceId} = useWorkspaceContext();
 
     const { data: chats, refetch, isFetching, error } = useWorkspaceChatList({ workspaceId: workspaceId });
     const [selectedChat, setSelectedChat] = useState<ChatType | null>(null);

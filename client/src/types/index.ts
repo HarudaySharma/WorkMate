@@ -1,3 +1,5 @@
+import WorkSpaceInfo from "../components/Workspace/WorkSpaceInfo";
+
 export interface ErrorFormat {
     message: string,
     statusCode: number,
@@ -25,7 +27,7 @@ export type WorkSpace = {
     id: number, // workSpace id
     name: string,
     creator_id: number,
-    inviteLink: string;
+    invite_link: string;
     // members: Member[], // join requests should also be there.
     //    chats: string[] // Foreign Key (Chat.id)
     //    // multiple chats in one workspace (one-one or group chats)
@@ -80,6 +82,8 @@ export type WorkspaceMember = {
     workspace_id: number, // Foreign Key (WorkSpace.id)
     role: 'admin' | 'member',
 }
+
+export type WorkSpaceInfo = (WorkSpace | Omit<WorkSpace, 'invite_link'>);
 
 export interface WorkspaceMemberReturn extends Pick<WorkspaceMember, "role">, Pick<User, "id" | "username" | "name" | "email" | "profile_picture"> { }
 

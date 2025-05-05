@@ -1,17 +1,17 @@
 import env from "../zod"
-import { ErrorFormat, WorkspaceMemberReturn } from "../types"
+import { ErrorFormat, WorkSpaceInfo } from "../types"
 import { useQuery } from "@tanstack/react-query"
 
 
-export interface UseWorkpaceMembersListParams {
+export interface UseWorkpaceInfoParams {
     workspaceId?: number
 }
 
-const useWorkspaceMembersList = ({ workspaceId }: UseWorkpaceMembersListParams) => {
+const useWorkspaceInfo = ({ workspaceId }: UseWorkpaceInfoParams) => {
     return useQuery({
-        queryKey: ["workspace-members-list", workspaceId],
+        queryKey: ["workspace-info", workspaceId],
         queryFn: async () => {
-            const resp = await fetch(`${env.VITE_API_URL}/api/workspace/${workspaceId}/members`, {
+            const resp = await fetch(`${env.VITE_API_URL}/api/workspace/${workspaceId}`, {
                 method: "GET",
                 headers: {
                     'accept': 'application/json',
@@ -27,10 +27,10 @@ const useWorkspaceMembersList = ({ workspaceId }: UseWorkpaceMembersListParams) 
             // refer to the workmate backend service return types for data structure
             const data = await resp.json()
 
-            return data.data.members as WorkspaceMemberReturn[];
+            return data.data.workspace as WorkSpaceInfo;
         },
         enabled: !!workspaceId,
     })
 }
 
-export default useWorkspaceMembersList
+export default useWorkspaceInfo
