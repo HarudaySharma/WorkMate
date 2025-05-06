@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import useChatContext, { ChatRecieverState } from '../../../hooks/useChatContext';
 import useAuth from '../../../hooks/useAuth';
 import toast from 'react-hot-toast';
-import getChatMembers from '../../../utils/getChatMembers';
+import getChatMembers from '../../../utils/http/getChatMembers';
 
 export interface ChatListParams {
     className?: string;

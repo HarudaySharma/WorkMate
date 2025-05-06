@@ -24,7 +24,7 @@ const Workspace = () => {
     const [showJoinModal, setShowJoinModal] = useState(false);
 
     const [startWkspcListFetching, setStartWkspcListFetching] = useState(false)
-    const { data: workspaces, error, isFetching } = useWorkspaceList({ startFetching: startWkspcListFetching })
+    const { data: workspaces, error, isFetching, refetch: refetchWorkspaceList } = useWorkspaceList({ startFetching: startWkspcListFetching })
 
     const { data: workspaceMembers, refetch: refetchWorkspaceMembers } = useWorkspaceMembersList({ workspaceId: Number(workspaceId) })
     const { data: workspaceInfo } = useWorkspaceInfo({ workspaceId: Number(workspaceId) })
@@ -55,6 +55,7 @@ const Workspace = () => {
         workspaceMembers: workspaceMembers,
         workspaceInfo: workspaceInfo,
         refetchWorkspaceMembers,
+        refetchWorkspaceList,
     }
 
     return (
@@ -211,7 +212,7 @@ const Workspace = () => {
                   hover:bg-blue-700 transition-colors hover:cursor-pointer'>
                             <Plus size={20} />
                             <span>Create New Workspace</span>
-                        </button>   
+                        </button>
 
                         {/* Profile button with dropdown */}
                         <div className="text-center">

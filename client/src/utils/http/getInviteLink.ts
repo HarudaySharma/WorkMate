@@ -1,5 +1,5 @@
-import { ErrorFormat } from "../types"
-import env from "../zod"
+import { ErrorFormat } from "../../types"
+import env from "../../zod"
 
 async function getInviteLink() {
     const resp = await fetch(`${env.VITE_API_URL}/api/workspace/inviteToken`, {

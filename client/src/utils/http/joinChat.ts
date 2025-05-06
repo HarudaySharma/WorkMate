@@ -1,5 +1,5 @@
-import { ChatMember, ErrorFormat, TypicalReturnObj } from "../types"
-import env from "../zod"
+import { ChatMember, ErrorFormat, TypicalReturnObj } from "../../types"
+import env from "../../zod"
 
 export interface JoinChatParams {
     workspaceId: number;

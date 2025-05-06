@@ -1,9 +1,9 @@
 import { Copy, Link } from 'lucide-react';
 import React, { useState } from 'react'
 import toast from 'react-hot-toast';
-import getInviteLink from '../../utils/getInviteLink';
+import getInviteLink from '../../utils/http/getInviteLink';
 import { ErrorFormat } from '../../types';
-import createWorkSpace from '../../utils/createWorkspace';
+import createWorkSpace from '../../utils/http/createWorkspace';
 
 interface CreateWorkspaceModalProp {
     onClose: () => void;
@@ -73,7 +73,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className='absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl 
+                    className='absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl
                     dark:text-gray-100 dark:hover:text-gray-400'
                 >
                     ×
@@ -105,7 +105,7 @@ const CreateWorkspaceModal: React.FC<CreateWorkspaceModalProp> = ({ onClose }) =
                                 onClick={() => setStep(2)}
                                 disabled={!workspaceName.trim()}
                                 className='bg-customBlue text-white px-6 py-2 rounded-lg hover:bg-blue-700
-                    transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed 
+                    transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed
                     dark:bg-customYellow dark:text-gray-700 dark:hover:bg-yellow-500'
                             >
                                 Next ˃

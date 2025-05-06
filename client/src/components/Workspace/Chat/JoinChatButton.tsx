@@ -4,7 +4,7 @@ import { Dialog } from '@headlessui/react';
 import { UserPlus } from 'lucide-react';
 import toast from "react-hot-toast";
 import { ErrorFormat } from "../../../types";
-import joinChat from "../../../utils/joinChat";
+import joinChat from "../../../utils/http/joinChat";
 import useChatContext from "../../../hooks/useChatContext";
 
 interface JoinChatPopupButtonParams {

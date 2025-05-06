@@ -1,5 +1,5 @@
-import { ErrorFormat, User } from "../types"
-import env from "../zod"
+import { ErrorFormat, User } from "../../types"
+import env from "../../zod"
 
 async function getUserInfo() {
     const resp = await fetch(`${env.VITE_API_URL}/api/user/me`, {

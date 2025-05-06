@@ -1,5 +1,5 @@
-import { ErrorFormat, WorkSpace } from "../types"
-import env from "../zod"
+import { ErrorFormat, WorkSpace } from "../../types"
+import env from "../../zod"
 
 export interface CreateWorkspaceParams {
     name: string;

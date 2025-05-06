@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { ErrorFormat } from '../../../types'
-import createChat from '../../../utils/createChat'
+import { ErrorFormat } from '../../types'
+import createChat from '../../utils/http/createChat'
 import { useNavigate, useParams } from 'react-router-dom'
 
 interface NewGroupChatProp {

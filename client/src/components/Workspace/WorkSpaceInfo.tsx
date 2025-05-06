@@ -1,13 +1,12 @@
 import { Copy, MoreHorizontal, Shield, UserMinus } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import useWorkspaceMembersList from '../../hooks/useWorkspaceMembersList';
 import useAuth from '../../hooks/useAuth';
 import useWorkspaceContext from '../../hooks/useWorkspaceContext';
 import { ErrorFormat, WorkSpace, WorkspaceMember } from '../../types';
 import Loader from '../Loader';
 import toast from 'react-hot-toast';
-import removeWorkspaceMember from '../../utils/removeWorkspaceMember';
-import modifyWorkspaceMember from '../../utils/modifyWorkspaceMember';
+import removeWorkspaceMember from '../../utils/http/removeWorkspaceMember';
+import modifyWorkspaceMember from '../../utils/http/modifyWorkspaceMember';
 
 const WorkSpaceInfo = () => {
 

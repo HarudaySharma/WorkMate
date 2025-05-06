@@ -1,7 +1,7 @@
 import React, { } from 'react'
 import useChatContext from '../../../hooks/useChatContext';
 import toast from 'react-hot-toast';
-import createChat from '../../../utils/createChat';
+import createChat from '../../../utils/http/createChat';
 import { ErrorFormat, WorkspaceMemberReturn } from '../../../types';
 import useWorkspaceMembersList from '../../../hooks/useWorkspaceMembersList';
 import Loader from '../../Loader';

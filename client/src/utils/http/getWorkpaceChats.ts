@@ -1,13 +1,12 @@
-import { ChatMemberReturn, ErrorFormat } from "../types"
-import env from "../zod"
+import { Chat, ErrorFormat } from "../../types"
+import env from "../../zod"
 
-export interface GetChatMembersParams {
+export interface GetWorkspaceChatsParams {
     workspaceId: number;
-    chatId: number;
 }
 
-export default async function getChatMembers({workspaceId, chatId}: GetChatMembersParams) {
-    const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}/${chatId}/members`, {
+export default async function getWorkspaceChats({workspaceId}: GetWorkspaceChatsParams) {
+    const resp = await fetch(`${env.VITE_API_URL}/api/chat/${workspaceId}/all`, {
         method: "GET",
         headers: {
             'accept': 'application/json',
@@ -23,5 +22,5 @@ export default async function getChatMembers({workspaceId, chatId}: GetChatMembe
     // refer to the workmate backend service return types for data structure
     const data = await resp.json()
 
-    return data.data.members as ChatMemberReturn[];
+    return data.data.chats as Chat[];
 }

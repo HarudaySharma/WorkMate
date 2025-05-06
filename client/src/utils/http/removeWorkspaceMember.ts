@@ -1,5 +1,5 @@
-import { ErrorFormat, TypicalReturnObj, WorkSpace, WorkspaceMember } from "../types";
-import env from "../zod";
+import { ErrorFormat, TypicalReturnObj, WorkSpace, WorkspaceMember } from "../../types";
+import env from "../../zod";
 
 export interface RemoveWorkspaceMemberParams {
     workspaceId: WorkSpace["id"];

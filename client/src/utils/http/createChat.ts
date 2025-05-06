@@ -1,5 +1,5 @@
-import { Chat, ErrorFormat } from "../types"
-import env from "../zod"
+import { Chat, ErrorFormat } from "../../types"
+import env from "../../zod"
 
 export interface CreateChatParams {
     workspaceId: number;
