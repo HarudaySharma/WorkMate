@@ -24,18 +24,21 @@ const joinChat = () => {
     });
 }
 
-const createMessage = () => {
-    console.log("creating a new message....")
-    socket.emit("create-message", {
-        "workspaceId": 1,
-        "chatId": 2,
-        message: {
-            type: 'text',
-            text: "this is a dummy text",
-        },
-    } as CreateMessageEventParams,);
-}
-
+// const createMessage = () => {
+//     console.log("creating a new message....")
+//     socket.emit("create-message", {
+//         "workspaceId": 1,
+//         "chatId": 2,
+//         message: {
+//             type: 'text',
+//             text: "this is a dummy text",
+//         },
+//         chat: {
+//             id: chat
+//         }
+//     } as CreateMessageEventParams,);
+// }
+//
 socket.on("new-message", (retObj: CreateMessageRet) => {
     console.log("new message recieved")
     console.log(retObj)
@@ -58,7 +61,7 @@ socket.on("connect_error", (err) => {
 
 function start() {
     joinChat()
-    createMessage()
+    // createMessage()
 }
 
 

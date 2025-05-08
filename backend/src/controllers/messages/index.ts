@@ -6,7 +6,7 @@ import db from "../../services/mqsql/mysql.service.js";
 import logger from "../../logger.js";
 import Workmate from "../../services/workmate/workmate.service.js";
 import { WorkmateError } from "../../types/workspace.service.js";
-import { Message } from "../../database_schema.js";
+import { Chat, Message } from "../../database_schema.js";
 
 export const createMessage = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("HIT: PUT /chat/:workspaceId/:chatId/message")
@@ -28,7 +28,7 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
         return
     }
 
-    const { message } = req.body as { message: Message }
+    const { message, chat } = req.body as { message: Message, chat: Chat }
 
     try {
         const workmate = new Workmate(db)
@@ -38,6 +38,7 @@ export const createMessage = async (req: Request, res: Response, next: NextFunct
             chat: {
                 id: +chatId,
                 workspace_id: +workspaceId,
+                type: chat.type,
             },
             msg: {
                 type: message.type,

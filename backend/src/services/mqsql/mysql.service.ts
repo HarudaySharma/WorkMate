@@ -49,6 +49,7 @@ export class Database {
                     user: env.MYSQL_USER,
                     password: env.MYSQL_USER_PASS,
                     database: env.MYSQL_DATABASE,
+                    port: +env.MYSQL_PORT,
                 })
 
                 logger.info(`connected to MySQL database "${env.MYSQL_DATABASE}" with id: ${this.#database.threadId}.`)
