@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const index_js_1 = require("../../controllers/user/index.js");
+const verifyToken_middleware_js_1 = require("../../middlewares/verifyToken.middleware.js");
+const router = (0, express_1.Router)();
+router.get("/me", verifyToken_middleware_js_1.verifyToken, index_js_1.userInfo);
+router.post("/logout", verifyToken_middleware_js_1.verifyToken, index_js_1.logout);
+router.delete("/delete", verifyToken_middleware_js_1.verifyToken, index_js_1.deleteUser);
+exports.default = router;

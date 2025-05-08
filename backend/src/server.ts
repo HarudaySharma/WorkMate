@@ -33,6 +33,14 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 
+
+app.get("/", (_, res) => {
+    res.json({
+        status: "sever is running",
+    })
+})
+
+
 // routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
@@ -47,15 +55,15 @@ app.use(errorHandler)
 
 
 // starting the server
-const PORT = env.PORT
-app.listen(PORT, (err) => {
-    if (err) {
-        logger.fatal(`failed to start the server at PORT: ${PORT}`)
-        return
-    }
-    logger.info(`server running on http://localhost:${PORT}`)
-})
-
+// const PORT = env.PORT
+// app.listen(PORT, (err) => {
+//     if (err) {
+//         logger.fatal(`failed to start the server at PORT: ${PORT}`)
+//         return
+//     }
+//     logger.info(`server running on http://localhost:${PORT}`)
+// })
+//
 startWSServer()
 
 process.on("SIGINT", async () => {
